@@ -1,25 +1,22 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+// import { Link } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
 import "../css/ProfileLookup.css";
 
 const ProfileLookup = () => {
-  // State to track the active menu item
-  const [activeMenu, setActiveMenu] = useState("Profile Lookup");
-
-  // Menu items
-  const menuItems = [
-    { name: "Profile Lookup", path: "/profile-lookup" },
-    { name: "Bulk Lookup", path: "/bulk-lookup" },
-    { name: "API Access" },
-    { name: "API Documentation" },
-    { name: "Plans & Pricing" },
-    { name: "Sign out" },
-  ];
-
-  const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [linkedinLink, setLinkedinLink] = useState("");
   const [resultData, setResultData] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const userEmail = JSON.parse(localStorage.getItem("user"))?.email || "Guest";
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      window.location.href = "/login";
+    }
+  }, []);
 
   const handleSearch = async () => {
     const linkedinRegex = /([a-z]{2,3}\.)?linkedin\.com\/.+$/;
@@ -58,79 +55,14 @@ const ProfileLookup = () => {
 
   return (
     <div className="dashboard">
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="user-info">
-          <div className="avatar-container">
-            <img
-              src="https://via.placeholder.com/100"
-              alt="Profile"
-              className="avatar"
-            />
-          </div>
-          <p>devkayasth.edunet@gmail.com</p>
-        </div>
-        <nav className="menu">
-          <ul>
-            {menuItems.map((item) => (
-              <li
-                key={item.name}
-                className={activeMenu === item.name ? "active" : ""}
-                onClick={() => setActiveMenu(item.name)}
-              >
-                {/* Wrap the entire li area in the Link component */}
-                <Link to={item.path} className="menu-link">
-                  {item.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+      <Sidebar userEmail={userEmail} />
 
-        <div className="start-plan">
-          <h3>Start Your Plan</h3>
-          <p>
-            Upgrade your plan to unlock additional features and access more
-            credits.
-          </p>
-          <button>Upgrade</button>
-        </div>
-      </aside>
-
-      {/* Main Content */}
       <div className="main-content">
-        {/* Header Section */}
         <div className="header">
           <h1 className="profile-lookup">Profile Lookup</h1>
-          {/* <div className="credits">
-            <div>
-              Credits: <span>20</span>
-            </div>
-            <div>
-              Daily Limit: <span>20</span>
-            </div>
-          </div> */}
         </div>
 
-        {/* Explore Real-Time Data Section */}
         <div className="explore-section">
-          {/* <h1>Explore Real-Time Data</h1>
-          <p>
-            Retrieve contact and company data in real time using our OSINT
-            methods. Just provide the input and access the data you need
-            instantly.
-          </p> */}
-
-          {/* Lookup Options */}
-          {/* <div className="lookup-options">
-            <div className="lookup-card">Email Lookup</div>
-            <div className="lookup-card">Person Finder</div>
-            <div className="lookup-card">Company Finder</div>
-            <div className="lookup-card">LinkedIn URL</div>
-            <div className="lookup-card new-feature">Activities Finder</div>
-          </div> */}
-
-          {/* Search Box */}
           <div className="search-box">
             <input
               type="url"
@@ -139,7 +71,7 @@ const ProfileLookup = () => {
               onChange={(e) => setLinkedinLink(e.target.value)}
             />
             <button className="search-button" onClick={handleSearch}>
-              {isLoading ? "Search" : "Search"}
+              {isLoading ? "Searching..." : "Search"}
             </button>
           </div>
 

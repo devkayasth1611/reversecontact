@@ -1,26 +1,27 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Papa from "papaparse"; // For CSV parsing
 import * as XLSX from "xlsx"; // For Excel file parsing
+import Sidebar from "../components/Sidebar"; // Import Sidebar
 import "../css/ProfileLookup.css";
 
 const BulkLookup = () => {
-  // State to track the active menu item
-  const [activeMenu, setActiveMenu] = useState("Bulk Lookup");
-
-  // Menu items
-  const menuItems = [
-    { name: "Profile Lookup", path: "/profile-lookup" },
-    { name: "Bulk Lookup", path: "/bulk-lookup" },
-    { name: "API Access" },
-    { name: "API Documentation" },
-    { name: "Plans & Pricing" },
-    { name: "Sign out" },
-  ];
-
+  const navigate = useNavigate(); // For redirecting to login after sign-out
   const [isLoading, setIsLoading] = useState(false);
   const [bulkResults, setBulkResults] = useState([]);
   const [file, setFile] = useState(null);
+
+  // Retrieve email from localStorage
+  const userEmail = JSON.parse(localStorage.getItem("user"))?.email || "Guest";
+
+  // Redirect to login if user is not authenticated
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      window.location.href = "/login";
+    }
+  }, []);
+
   const handleFileUpload = async () => {
     if (!file) {
       alert("Please upload a file first.");
@@ -119,63 +120,18 @@ const BulkLookup = () => {
 
   return (
     <div className="dashboard">
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="user-info">
-          <div className="avatar-container">
-            <img
-              src="https://via.placeholder.com/100"
-              alt="Profile"
-              className="avatar"
-            />
-          </div>
-          <p>devkayasth.edunet@gmail.com</p>
-        </div>
-        <nav className="menu">
-          <ul>
-            {menuItems.map((item) => (
-              <li
-                key={item.name}
-                className={activeMenu === item.name ? "active" : ""}
-                onClick={() => setActiveMenu(item.name)}
-              >
-                {/* Wrap the entire li area in the Link component */}
-                <Link to={item.path} className="menu-link">
-                  {item.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <div className="start-plan">
-          <h3>Start Your Plan</h3>
-          <p>
-            Upgrade your plan to unlock additional features and access more
-            credits.
-          </p>
-          <button>Upgrade</button>
-        </div>
-      </aside>
+      {/* Sidebar Component */}
+      <Sidebar userEmail={userEmail} />
 
       {/* Main Content */}
       <div className="main-content">
         {/* Header Section */}
         <div className="header">
           <h1 className="profile-lookup">Bulk Lookup</h1>
-          {/* <div className="credits">
-            <div>
-              Credits: <span>20</span>
-            </div>
-            <div>
-              Daily Limit: <span>20</span>
-            </div>
-          </div> */}
         </div>
 
         {/* Explore Real-Time Data Section */}
         <div className="explore-section">
-          {/* <h1>Explore Real-Time Data</h1> */}
           <div className="file-upload-container">
             <label htmlFor="file-input" className="upload-label">
               Choose File

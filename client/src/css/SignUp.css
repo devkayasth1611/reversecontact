@@ -14,7 +14,7 @@
   .signup-left {
     flex: 1;
     max-width: 45%;
-    padding: 2rem 4rem;
+    padding: 1rem 4rem;
     display: flex;
     align-items: flex-start;
     flex-direction: column;
@@ -28,26 +28,26 @@
   
   .logo-sign-up img {
     width: 50px;
-    /* margin-top: 80px; */
+    margin-top: 36px;
   }
   
   .signup-left h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: bold;
     color: #333;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.2rem;
   }
   
   .signup-left p {
     font-size: 0.9rem;
     color: #666;
-    margin-bottom: 1rem;
+    margin-bottom: 0.2rem;
   }
   
   .input-field {
     width: 56%;
     padding: 0.8rem;
-    margin: 1rem 0;
+    margin: 0.8rem 0;
     border: 1px solid #ddd;
     border-radius: 5px;
     font-size: 1rem;
@@ -75,7 +75,7 @@
     display: flex;
     align-items: center;
     justify-content: left;
-    margin: 5px 0;
+    margin: 2px 0;
     width: 135%;
   }
   
@@ -87,7 +87,7 @@
   }
   
   .or-text {
-    margin: 10px 10px;
+    margin: 2px 2px;
     font-size: 0.8rem;
     color: #374151;
   }
@@ -111,7 +111,7 @@
   }
   
   .google-icon-text{
-    margin-top: 10px;
+    margin-top: 1px;
   }
   
   .google-signup-button .google-icon {

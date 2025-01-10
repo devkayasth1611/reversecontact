@@ -8,7 +8,7 @@ const Sidebar = ({ userEmail }) => {
   const menuItems = [
     { name: "Profile Lookup", path: "/profile-lookup" },
     { name: "Bulk Lookup", path: "/bulk-lookup" },
-    { name: "API Access", path: "/api-access" },
+    { name: "Statistic", path: "/statistic" },
     { name: "API Documentation", path: "/api-documentation" },
     { name: "Plans & Pricing", path: "/plans-pricing" },
     { name: "Sign out" },

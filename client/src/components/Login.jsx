@@ -25,7 +25,7 @@ function Login() {
       return;
     }
 
-    // Password length check (you can adjust the length as per your requirements)
+    // Password length check
     if (password.length < 6) {
       setErrorMessage("Password must be at least 6 characters long.");
       return;
@@ -43,11 +43,14 @@ function Login() {
           userPassword: password,
         }),
       });
-
+      console.log({ email, password });  // Log the values of email and password
       const data = await response.json();
 
       if (response.ok) {
-        // Store user data in localStorage or a state management solution
+        // Store JWT token in localStorage
+        localStorage.setItem("user", JSON.stringify({ email: data.email, token: data.token }));
+
+        // Optionally store user info
         localStorage.setItem("user", JSON.stringify(data.user));
 
         // Redirect to the profile-lookup page or dashboard

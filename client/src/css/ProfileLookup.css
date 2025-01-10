@@ -383,6 +383,60 @@ input[type="file"] {
   background-color: #0056b3;
 }
 
+/* Table Styling */
+.statistics-page table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 16px;
+  text-align: left;
+}
+
+.statistics-page th, 
+.statistics-page td {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+}
+
+.statistics-page th {
+  background-color: #f4f4f4;
+  color: #333;
+  font-weight: bold;
+}
+
+.statistics-page tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.statistics-page tr:hover {
+  background-color: #f1f1f1;
+}
+
+.statistics-page td {
+  text-align: center;
+}
+
+.statistics-page th:first-child,
+.statistics-page td:first-child {
+  width: 5%;
+}
+
+.statistics-page th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* Table Container for Scroll */
+.statistics-page {
+  overflow-x: auto;
+  margin: 0 auto;
+  max-width: 100%;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+
 
 /* Fade-in animation */
 @keyframes fadeIn {

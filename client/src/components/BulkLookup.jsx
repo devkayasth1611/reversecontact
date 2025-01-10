@@ -10,6 +10,18 @@ const BulkLookup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [bulkResults, setBulkResults] = useState([]);
   const [file, setFile] = useState(null);
+  const [statistics, setStatistics] = useState(() => {
+    // Retrieve stored statistics or initialize empty object
+    return (
+      JSON.parse(localStorage.getItem("statisticsData")) || {
+        duplicateCount: 0,
+        netNewCount: 0,
+        newEnrichedCount: 0,
+        creditUsed: 0,
+        remainingCredits: 1000,
+      }
+    );
+  });
 
   // Retrieve email from localStorage
   const userEmail = JSON.parse(localStorage.getItem("user"))?.email || "Guest";
@@ -28,7 +40,14 @@ const BulkLookup = () => {
       return;
     }
 
+    const isDuplicate = checkDuplicateFile(file.name);
+
+    if (isDuplicate) {
+      alert(`Duplicate file detected: ${file.name}.`);
+    }
+
     try {
+      // File processing logic remains the same
       const reader = new FileReader();
       reader.onload = async (e) => {
         const fileData = e.target.result;
@@ -54,6 +73,7 @@ const BulkLookup = () => {
 
         setIsLoading(true);
 
+        // API call
         const apiUrl = `http://localhost:3000/mobileEnrichments/mobileEnrichment?linkedin_url=${validLinks.join(
           ","
         )}`;
@@ -66,26 +86,24 @@ const BulkLookup = () => {
         if (data.data && data.data.length > 0) {
           const bulkData = validLinks.map((link, index) => {
             const result = data.data[index];
-            if (result) {
-              return {
-                linkedin_url: link,
-                full_name: result.full_name || "Not Available",
-                lead_location: result.lead_location || "Not Available",
-                mobile_1: result.mobile_1 || "Not Available",
-                mobile_2: result.mobile_2 || "Not Available",
-              };
-            } else {
-              return {
-                linkedin_url: link,
-                full_name: "Not Available",
-                lead_location: "Not Available",
-                mobile_1: "Not Available",
-                mobile_2: "Not Available",
-              };
-            }
+            return {
+              linkedin_url: link,
+              full_name: result?.full_name || "Not Available",
+              lead_location: Array.isArray(result?.lead_location)
+                ? result.lead_location.join(", ")
+                : result?.lead_location || "Not Available",
+              mobile_1: result?.mobile_1 || "Not Available",
+              mobile_2: result?.mobile_2 || "Not Available",
+            };
           });
 
           setBulkResults(bulkData);
+          await saveStatistics(
+            file.name,
+            validLinks,
+            bulkData.length,
+            isDuplicate
+          );
           alert("Bulk data fetched successfully!");
         } else {
           alert("No data found for the provided LinkedIn URLs.");
@@ -102,6 +120,64 @@ const BulkLookup = () => {
       alert("Error processing file. Please try again later.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const checkDuplicateFile = (filename) => {
+    const previousUploads =
+      JSON.parse(localStorage.getItem("previousUploads")) || [];
+    if (previousUploads.includes(filename)) {
+      return true;
+    } else {
+      previousUploads.push(filename);
+      localStorage.setItem("previousUploads", JSON.stringify(previousUploads));
+      return false;
+    }
+  };
+
+  const saveStatistics = async (
+    filename,
+    validLinks,
+    newEnrichedCount,
+    isDuplicate
+  ) => {
+    const duplicateCount = isDuplicate
+      ? statistics.duplicateCount + 1
+      : statistics.duplicateCount;
+    const netNewCount = isDuplicate
+      ? statistics.netNewCount
+      : statistics.netNewCount + validLinks.length;
+    const creditUsed = statistics.creditUsed + newEnrichedCount * 5;
+    const remainingCredits = statistics.remainingCredits - newEnrichedCount * 5;
+
+    const updatedStatistics = {
+      filename,
+      duplicateCount,
+      netNewCount,
+      newEnrichedCount,
+      creditUsed,
+      remainingCredits: Math.max(0, remainingCredits),
+    };
+
+    localStorage.setItem("statisticsData", JSON.stringify(updatedStatistics));
+    setStatistics(updatedStatistics);
+
+    // Log the data to ensure it's being sent correctly
+    console.log("Updated statistics to save:", updatedStatistics);
+
+    try {
+      const response = await fetch("http://localhost:3000/bulkUpload/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedStatistics),
+      });
+
+      if (!response.ok)
+        throw new Error(`Error saving statistics: ${response.statusText}`);
+      alert("Statistics saved successfully!");
+    } catch (error) {
+      console.error("Error saving statistics:", error);
+      alert(`Error saving statistics: ${error.message}`);
     }
   };
 
@@ -144,7 +220,7 @@ const BulkLookup = () => {
               onChange={(e) => setFile(e.target.files[0])}
             />
             <button className="upload-button" onClick={handleFileUpload}>
-              {isLoading ? "Upload" : "Upload & Fetch"}
+              {isLoading ? "Uploading..." : "Upload & Fetch"}
             </button>
             {bulkResults.length > 0 && (
               <button className="download-button" onClick={handleDownloadExcel}>

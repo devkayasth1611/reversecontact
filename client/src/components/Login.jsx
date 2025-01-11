@@ -10,7 +10,7 @@ function Login() {
 
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+ const handleLogin = async (e) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -18,20 +18,8 @@ function Login() {
       return;
     }
 
-    // Basic email format check
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailPattern.test(email)) {
-      setErrorMessage("Please enter a valid email address.");
-      return;
-    }
-
-    // Password length check
-    if (password.length < 6) {
-      setErrorMessage("Password must be at least 6 characters long.");
-      return;
-    }
-
     setIsSubmitting(true);
+
     try {
       const response = await fetch("http://localhost:3000/users/login", {
         method: "POST",
@@ -43,24 +31,31 @@ function Login() {
           userPassword: password,
         }),
       });
-      console.log({ email, password });  // Log the values of email and password
-      const data = await response.json();
+
+      const result = await response.json();
 
       if (response.ok) {
-        // Store JWT token in localStorage
-        localStorage.setItem("user", JSON.stringify({ email: data.email, token: data.token }));
+        const user = result.user;
 
-        // Optionally store user info
-        localStorage.setItem("user", JSON.stringify(data.user));
+        if (user) {
+          // Store user data and roleId
+          localStorage.setItem("user", JSON.stringify(user));
+          localStorage.setItem("roleId", user.roleId);
 
-        // Redirect to the profile-lookup page or dashboard
-        navigate("/profile-lookup");
+          // Navigate based on roleId
+          if (parseInt(user.roleId) === 1) {
+            navigate("/add-user");
+          } else {
+            navigate("/profile-lookup");
+          }
+        } else {
+          setErrorMessage("User not found. Please check your credentials.");
+        }
       } else {
-        setErrorMessage(data.message || "Login failed. Please try again.");
+        setErrorMessage(result.message || "Login failed. Please try again.");
       }
     } catch (error) {
       setErrorMessage("An error occurred. Please try again later.");
-      console.error("Login error:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -70,7 +65,7 @@ function Login() {
     <div className="login-container">
       <div className="login-logo-container">
         <img
-          src="logo.png" // Replace with the actual logo path
+          src="logo.png"
           alt="Logo"
           className="login-logo"
         />
@@ -105,7 +100,7 @@ function Login() {
         </div>
         <button type="button" className="google-login-button">
           <img
-            src="/google.png" // Replace with the Google icon path
+            src="/google.png"
             alt="Google"
             className="google-icon"
           />

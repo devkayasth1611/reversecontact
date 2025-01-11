@@ -1,0 +1,140 @@
+/* Form Container */
+.add-user-form-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .add-user-form-container h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .add-user-form-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .add-user-form-container input[type="email"],
+  .add-user-form-container input[type="password"] {
+    padding: 12px 15px;
+    font-size: 16px;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    background-color: #ffffff;
+    transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  }
+  
+  .add-user-form-container input[type="email"]:focus,
+  .add-user-form-container input[type="password"]:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+  }
+  
+  .add-user-form-container button[type="submit"] {
+    padding: 12px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+  }
+  
+  .add-user-form-container button[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+  
+  .add-user-form-container button[type="submit"]:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  .add-user-form-container .error-message {
+    color: #ff4d4f;
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  .add-user-form-container div {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .add-user-form-container input::placeholder {
+    color: #999;
+  }
+  
+  .add-user-form-container input[type="email"]:hover,
+  .add-user-form-container input[type="password"]:hover {
+    background-color: #f1f1f1;
+  }
+
+  /* User List Table Styles */
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 16px;
+    text-align: left;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .user-table th,
+  .user-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .user-table th {
+    background-color: #007bff;
+    color: white;
+    text-transform: uppercase;
+  }
+  
+  .user-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  .user-table tr:hover {
+    background-color: #e6f7ff;
+  }
+  
+  .user-table td {
+    color: #333;
+  }
+  
+  /* Header Styling */
+  .user-list-header {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  /* Error Message Styling */
+  .error-message {
+    color: #ff4d4f;
+    font-size: 16px;
+    text-align: center;
+    margin: 10px 0;
+  }
+  
+  /* Loading Message */
+  .main-content p {
+    font-size: 16px;
+    color: #666;
+    text-align: center;
+  }
+  

@@ -13,6 +13,7 @@ const SignUp = () => {
     const userData = {
       userEmail: email,
       userPassword: password,
+      roleId: 1, // Assign role ID for Admin
     };
 
     try {

@@ -14,8 +14,10 @@ import Login from "./components/Login";
 import SignUp from "./components/SignUp";
 import ProfileLookup from "./components/ProfileLookup";
 import BulkLookup from "./components/BulkLookup";
-// import HumanCheck from "./components/HumanCheck";
+import AddUser from "./components/AddUser";
 import Statistic from "./components/Statistic";
+import UserList from "./components/userList";
+
 import "./App.css";
 
 function App() {
@@ -26,6 +28,8 @@ function App() {
     "/profile-lookup",
     "/bulk-lookup",
     "/statistic",
+    "/add-user",
+    "/user-list"
   ]; // Paths without Header/Footer
 
   const isExcluded = excludePaths.includes(location.pathname); // Check if current path matches
@@ -40,12 +44,10 @@ function App() {
         <Route path="/statistic" element={<Statistic />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
-        {/* <Route path="/human-check" element={<HumanCheck />} /> */}
+        <Route path="/add-user" element={<AddUser />} />
+        <Route path="/user-list" element={<UserList />} />
         <Route path="/mobile-enrichment" element={<MobileEnrichment />} />
-        <Route
-          path="/linkedin-contact-verification"
-          element={<LinkedinContactVerification />}
-        />
+        <Route path="/linkedin-contact-verification" element={<LinkedinContactVerification />} />
       </Routes>
       {!isExcluded && <Footer />} {/* Show Footer if path is not excluded */}
     </>

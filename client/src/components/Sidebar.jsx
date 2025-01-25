@@ -33,8 +33,8 @@ const Sidebar = () => {
     { name: "Profile Lookup", path: "/profile-lookup" },
     { name: "Bulk Lookup", path: "/bulk-lookup" },
     { name: "Statistic", path: "/statistic" },
-    { name: "API Documentation", path: "/api-documentation" },
-    { name: "Plans & Pricing", path: "/plans-pricing" },
+    { name: "API Documentation" },
+    { name: "Plans & Pricing" },
     { name: "Sign out" },
   ];
 

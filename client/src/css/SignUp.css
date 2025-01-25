@@ -1,7 +1,7 @@
 /* General Container */
 .signup-container {
     display: flex;
-    height: 580px;
+    height: 850px;
     background-color: rgba(237, 242, 244, 0.744);
     font-family: Arial, sans-serif;
     border-radius: 15px;
@@ -28,7 +28,7 @@
   
   .logo-sign-up img {
     width: 50px;
-    margin-top: 36px;
+    margin-top: 3px;
   }
   
   .signup-left h1 {
@@ -75,7 +75,7 @@
     display: flex;
     align-items: center;
     justify-content: left;
-    margin: 2px 0;
+    margin: 2px 0 12px;
     width: 135%;
   }
   
@@ -97,7 +97,7 @@
     border: 1px solid #ddd;
     border-radius: 6px;
     background-color: #2D3643;
-    font-size: 0.8rem;
+    /* font-size: 2.9rem; */
     color: #f4f4f4;
     display: flex;
     align-items: center;
@@ -108,12 +108,9 @@
   }
   .google-signup-button p{
     color: #b9b9b9;
+    margin-bottom: 12px;
   }
-  
-  .google-icon-text{
-    margin-top: 1px;
-  }
-  
+
   .google-signup-button .google-icon {
     width: 15px;
     height: 15px;
@@ -144,6 +141,13 @@
     color: #6366f1;
     text-decoration: none;
   }
+  .error-message {
+    justify-content: left;
+    color: red;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  
   
   /* Right Section */
   .signup-right {
@@ -159,12 +163,14 @@
   }
   
   .signup-right h2 {
+    margin-left: 120px;
     font-size: 1.8rem;
     font-weight: bold;
-    margin-bottom: 1rem;
+    margin-bottom: 0.1rem;
   }
   
   .signup-right p {
+    margin-left: 120px;
     font-size: 1rem;
     color: #fdfafa;
     line-height: 1.6;

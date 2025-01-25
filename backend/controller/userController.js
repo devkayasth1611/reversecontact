@@ -2,32 +2,47 @@ const userSchema = require('../model/userModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
+
 exports.addUser = async (req, res) => {
-  const { userEmail, userPassword, roleId } = req.body;
+  const { userEmail, userPassword, companyName, phoneNumber, roleId } = req.body;
+
+  if (!userEmail || !userPassword || !companyName || !phoneNumber) {
+    return res.status(400).json({ message: "All fields are mandatory." });
+  }
 
   try {
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(userPassword, 10); // 10 is the salt rounds
+    // Check for duplicate user
+    const existingUser = await userSchema.findOne({ userEmail });
+    if (existingUser) {
+      return res.status(409).json({ message: "User already exists." });
+    }
 
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(userPassword, 10);
+
+    // Create a new user
     const user = new userSchema({
       userEmail,
-      userPassword: hashedPassword,  // Save the hashed password
-      roleId: Number(roleId),         // Ensure roleId is stored as a number
+      userPassword: hashedPassword,
+      companyName,
+      phoneNumber,
+      roleId: parseInt(roleId, 10),
     });
 
-    // Save the user to the database
-    const data = await user.save();
+    const data = await user.save(); // Save user to DB
     res.status(200).json({
-      message: 'User added successfully.',
+      message: "User added successfully.",
       data: data,
     });
   } catch (err) {
-    res.status(400).json({
-      message: 'Something went wrong while adding the user.',
-      error: err,
+    console.error("Error while adding user:", err); // Debugging
+    res.status(500).json({
+      message: "Something went wrong while adding the user.",
+      error: err.message,
     });
   }
 };
+
 
 exports.getUser = (req, res) => {
   userSchema.find({ roleId: 2 })

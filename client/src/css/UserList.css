@@ -28,6 +28,7 @@
     border: 1px solid #dcdcdc;
     border-radius: 8px;
     background-color: #ffffff;
+    color:black;
     transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   }
   

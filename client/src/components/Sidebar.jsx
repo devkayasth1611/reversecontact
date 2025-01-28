@@ -32,9 +32,9 @@ const Sidebar = () => {
   const userMenuItems = [
     { name: "Profile Lookup", path: "/profile-lookup" },
     { name: "Bulk Lookup", path: "/bulk-lookup" },
-    { name: "Statistic", path: "/statistic" },
-    { name: "API Documentation" },
-    { name: "Plans & Pricing" },
+    { name: "User Statistic", path: "/UserStatistics" },
+    // { name: "API Documentation" },
+    // { name: "Plans & Pricing" },
     { name: "Sign out" },
   ];
 

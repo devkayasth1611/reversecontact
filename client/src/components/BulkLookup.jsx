@@ -135,12 +135,9 @@ const BulkLookup = () => {
     }
   };
 
-  const saveStatistics = async (
-    filename,
-    validLinks,
-    newEnrichedCount,
-    isDuplicate
-  ) => {
+  const saveStatistics = async (filename, validLinks, newEnrichedCount, isDuplicate) => {
+    const email = JSON.parse(localStorage.getItem("user"))?.email;
+  
     const duplicateCount = isDuplicate
       ? statistics.duplicateCount + 1
       : statistics.duplicateCount;
@@ -149,8 +146,9 @@ const BulkLookup = () => {
       : statistics.netNewCount + validLinks.length;
     const creditUsed = statistics.creditUsed + newEnrichedCount * 5;
     const remainingCredits = statistics.remainingCredits - newEnrichedCount * 5;
-
+  
     const updatedStatistics = {
+      email, // Include the user's email
       filename,
       duplicateCount,
       netNewCount,
@@ -158,20 +156,14 @@ const BulkLookup = () => {
       creditUsed,
       remainingCredits: Math.max(0, remainingCredits),
     };
-
-    localStorage.setItem("statisticsData", JSON.stringify(updatedStatistics));
-    setStatistics(updatedStatistics);
-
-    // Log the data to ensure it's being sent correctly
-    console.log("Updated statistics to save:", updatedStatistics);
-
+  
     try {
       const response = await fetch("http://localhost:3000/bulkUpload/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedStatistics),
       });
-
+  
       if (!response.ok)
         throw new Error(`Error saving statistics: ${response.statusText}`);
       alert("Statistics saved successfully!");
@@ -180,6 +172,7 @@ const BulkLookup = () => {
       alert(`Error saving statistics: ${error.message}`);
     }
   };
+  
 
   const handleDownloadExcel = () => {
     if (bulkResults.length === 0) {

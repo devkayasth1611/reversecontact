@@ -17,6 +17,7 @@ import BulkLookup from "./components/BulkLookup";
 import AddUser from "./components/AddUser";
 import Statistic from "./components/Statistic";
 import UserList from "./components/userList";
+import UserStatistics from "./components/UserStatistics";
 
 import "./App.css";
 
@@ -29,7 +30,8 @@ function App() {
     "/bulk-lookup",
     "/statistic",
     "/add-user",
-    "/user-list"
+    "/user-list",
+    "/UserStatistics"
   ]; // Paths without Header/Footer
 
   const isExcluded = excludePaths.includes(location.pathname); // Check if current path matches
@@ -46,6 +48,7 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/add-user" element={<AddUser />} />
         <Route path="/user-list" element={<UserList />} />
+        <Route path="/UserStatistics" element={<UserStatistics />} />
         <Route path="/mobile-enrichment" element={<MobileEnrichment />} />
         <Route path="/linkedin-contact-verification" element={<LinkedinContactVerification />} />
       </Routes>

@@ -43,6 +43,44 @@ exports.addUser = async (req, res) => {
   }
 };
 
+exports.addNewUser = async (req, res) => {
+  const { userEmail, userPassword, roleId } = req.body;
+
+  if (!userEmail || !userPassword) {
+    return res.status(400).json({ message: "All fields are mandatory." });
+  }
+
+  try {
+    // Check for duplicate user
+    const existingUser = await userSchema.findOne({ userEmail });
+    if (existingUser) {
+      return res.status(409).json({ message: "User already exists." });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(userPassword, 10);
+
+    // Create a new user
+    const user = new userSchema({
+      userEmail,
+      userPassword: hashedPassword,
+      roleId: parseInt(roleId, 10),
+    });
+
+    const data = await user.save(); // Save user to DB
+    res.status(200).json({
+      message: "User added successfully.",
+      data: data,
+    });
+  } catch (err) {
+    console.error("Error while adding user:", err); // Debugging
+    res.status(500).json({
+      message: "Something went wrong while adding the user.",
+      error: err.message,
+    });
+  }
+};
+
 
 exports.getUser = (req, res) => {
   userSchema.find({ roleId: 2 })

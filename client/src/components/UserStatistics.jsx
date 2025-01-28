@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar"; // Import Sidebar
 import "../css/ProfileLookup.css"; // Add custom styles
 
-const Statistics = () => {
+const UserStatistics = () => {
   const [statistics, setStatistics] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,7 +30,7 @@ const Statistics = () => {
       try {
         // Fetch statistics from the API
         const response = await fetch(
-          `http://localhost:3000/bulkUpload/allstatistics`
+          `http://localhost:3000/bulkUpload/userStatistics?email=${userEmail}`
         );
 
         if (!response.ok) {
@@ -105,4 +105,4 @@ const Statistics = () => {
   );
 };
 
-export default Statistics;
+export default UserStatistics;

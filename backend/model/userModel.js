@@ -15,17 +15,20 @@ const userSchema = new Schema(
     },
     companyName: {
       type: String,
-      // required: true, // Set to true if mandatory
       trim: true,
     },
     phoneNumber: {
       type: String,
-      // required: true, // Set to true if mandatory
       trim: true,
     },
     roleId: {
       type: Number,
       required: true,
+      trim: true,
+    },
+    createdBy: {
+      type: String, // Stores the email of the user who added this user
+      // required: true,
       trim: true,
     },
   },

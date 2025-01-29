@@ -1,50 +1,46 @@
 import React, { useState, useEffect } from "react";
-import Sidebar from "../components/Sidebar"; // Import Sidebar
-import "../css/ProfileLookup.css"; // Add custom styles
+import Sidebar from "../components/Sidebar";
+import "../css/Statistic.css";
 
 const Statistics = () => {
   const [statistics, setStatistics] = useState([]);
+  const [userEmails, setUserEmails] = useState([]);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Retrieve the logged-in user's email
-  const userEmail = JSON.parse(localStorage.getItem("user"))?.email || "Guest";
-
-  // Redirect to login if the user is not authenticated
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) {
-      window.location.href = "/login";
-    }
-  }, []);
+  const loggedInUserEmail = JSON.parse(localStorage.getItem("user"))?.email || "Guest";
 
   useEffect(() => {
-    const fetchUserStatistics = async () => {
-      if (!userEmail || userEmail === "Guest") {
-        setError("User is not logged in. Please log in to view statistics.");
-        return;
-      }
-
-      setLoading(true);
-
+    const fetchUserList = async () => {
       try {
-        // Fetch statistics from the API
-        const response = await fetch(
-          `http://localhost:3000/bulkUpload/allstatistics`
-        );
+        const response = await fetch("http://localhost:3000/users/user");
+        if (!response.ok) throw new Error("Failed to fetch users");
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch statistics: ${response.statusText}`);
-        }
+        const { data } = await response.json();
+        const filteredUsers = data.filter(user => user.createdBy === loggedInUserEmail);
+        const emails = filteredUsers.map(user => user.userEmail); // Extract emails
+
+        setUserEmails(emails);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    fetchUserList();
+  }, [loggedInUserEmail]);
+
+  useEffect(() => {
+    if (userEmails.length === 0) return;
+
+    const fetchStatistics = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/bulkUpload/allstatistics");
+        if (!response.ok) throw new Error("Failed to fetch statistics");
 
         const data = await response.json();
+        const filteredStatistics = data.filter(stat => userEmails.includes(stat.email));
 
-        if (data.length === 0) {
-          setError("No statistics found for this user.");
-        } else {
-          setStatistics(data);
-          setError("");
-        }
+        setStatistics(filteredStatistics);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -52,54 +48,48 @@ const Statistics = () => {
       }
     };
 
-    fetchUserStatistics();
-  }, [userEmail]);
+    fetchStatistics();
+  }, [userEmails]);
 
   return (
     <div className="dashboard">
-      {/* Sidebar Component */}
-      <Sidebar userEmail={userEmail} />
-
-      {/* Main Content */}
+      <Sidebar userEmail={loggedInUserEmail} />
       <div className="main-content">
-        {/* Header Section */}
-        <div className="header">
-          <h1 className="profile-lookup">User Statistics</h1>
-        </div>
-        <div className="statistics-page">
-          {loading ? (
-            <p>Loading statistics...</p>
-          ) : error ? (
-            <p style={{ color: "red" }}>{error}</p>
-          ) : statistics.length > 0 ? (
-            <table>
-              <thead>
-                <tr>
-                  <th>File Name</th>
-                  <th>Duplicate Count</th>
-                  <th>Net New Count</th>
-                  <th>New Enriched Count</th>
-                  <th>Credits Used</th>
-                  <th>Remaining Credits</th>
+        <h1 className="profile-lookup">User Statistics</h1>
+        {loading ? (
+          <p>Loading statistics...</p>
+        ) : error ? (
+          <p style={{ color: "red" }}>{error}</p>
+        ) : statistics.length > 0 ? (
+          <table className="statistics-table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>File Name</th>
+                <th>Duplicate Count</th>
+                <th>Net New Count</th>
+                <th>New Enriched Count</th>
+                <th>Credits Used</th>
+                <th>Remaining Credits</th>
+              </tr>
+            </thead>
+            <tbody>
+              {statistics.map((stat, index) => (
+                <tr key={index}>
+                  <td>{stat.email}</td>
+                  <td>{stat.filename}</td>
+                  <td>{stat.duplicateCount}</td>
+                  <td>{stat.netNewCount}</td>
+                  <td>{stat.newEnrichedCount}</td>
+                  <td>{stat.creditUsed}</td>
+                  <td>{stat.remainingCredits}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {statistics.map((stat, index) => (
-                  <tr key={index}>
-                    <td>{stat.filename}</td>
-                    <td>{stat.duplicateCount}</td>
-                    <td>{stat.netNewCount}</td>
-                    <td>{stat.newEnrichedCount}</td>
-                    <td>{stat.creditUsed}</td>
-                    <td>{stat.remainingCredits}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p>No statistics available.</p>
-          )}
-        </div>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No statistics available.</p>
+        )}
       </div>
     </div>
   );

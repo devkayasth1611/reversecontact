@@ -13,13 +13,17 @@ const UserList = () => {
     const fetchUsers = async () => {
       try {
         const response = await fetch("http://localhost:3000/users/user");
-        
+
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);
         }
 
         const { data } = await response.json();
-        setUsers(data);
+
+        // Filter users based on the logged-in user's email
+        const filteredUsers = data.filter(user => user.createdBy === userEmail);
+        
+        setUsers(filteredUsers);
       } catch (error) {
         setError(error.message || "Failed to fetch user data.");
       } finally {
@@ -28,7 +32,7 @@ const UserList = () => {
     };
 
     fetchUsers();
-  }, []);
+  }, [userEmail]);
 
   return (
     <div className="dashboard">
@@ -56,7 +60,6 @@ const UserList = () => {
                 <tr key={user._id}>
                   <td>{index + 1}</td>
                   <td>{user.userEmail}</td>
-                  {/* <td>{user.roleId}</td> */}
                   <td>{user.userPassword}</td> {/* Display password (not secure) */}
                 </tr>
               ))}

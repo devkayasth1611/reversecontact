@@ -29,46 +29,42 @@ const AddUser = () => {
 
   const handleAddUser = async (e) => {
     e.preventDefault();
-
-    // Basic validation
     if (!email || !password) {
       setErrorMessage("Both email and password are required.");
       return;
     }
-
+  
     setIsSubmitting(true);
-
+  
+    const createdBy = JSON.parse(localStorage.getItem("user"))?.email || ""; // Get the logged-in user's email
+  
     const userData = {
       userEmail: email,
       userPassword: password,
-      roleId: 2, // Assign role ID for regular user
+      roleId: 2, // Regular user role
+      createdBy, // Store the creator's email
     };
-
+  
     try {
       const response = await fetch("http://localhost:3000/users/newuser", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
       });
-
+  
       const data = await response.json();
       if (response.ok) {
-        console.log("User added successfully:", data);
-        navigate("/user-list"); // Redirect after successful user addition
+        navigate("/user-list"); // Redirect after adding user
       } else {
         setErrorMessage(data.message || "Error adding user.");
       }
     } catch (error) {
-      console.error("Error adding user:", error);
-      setErrorMessage(
-        "An error occurred while adding the user. Please try again."
-      );
+      setErrorMessage("An error occurred while adding the user.");
     } finally {
       setIsSubmitting(false);
     }
   };
+  
 
   return (
     <>

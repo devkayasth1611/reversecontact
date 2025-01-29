@@ -1,0 +1,134 @@
+.statistics-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .credits-display {
+    margin-bottom: 20px;
+    text-align: right;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .statistics-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .statistics-table th,
+  .statistics-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+  
+  .statistics-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  .statistics-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .statistics-table tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .download-button {
+    padding: 5px 10px;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .download-button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Table Styling */
+  .statistics-page table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 16px;
+    text-align: left;
+  }
+  
+  .statistics-page th, 
+  .statistics-page td {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+  }
+  
+  .statistics-page th {
+    background-color: #f4f4f4;
+    color: #333;
+    font-weight: bold;
+  }
+  
+  .statistics-page tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .statistics-page tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .statistics-page td {
+    text-align: center;
+  }
+  
+  .statistics-page th:first-child,
+  .statistics-page td:first-child {
+    width: 5%;
+  }
+  
+  .statistics-page th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  
+  /* Table Container for Scroll */
+  .statistics-page {
+    overflow-x: auto;
+    margin: 0 auto;
+    max-width: 100%;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  
+  
+  /* Fade-in animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  /* Responsiveness */
+  @media (max-width: 768px) {
+    .sidebar {
+      width: 100%;
+      max-height: none;
+    }
+  
+    .main-content {
+      width: 100%;
+    }
+  
+    .lookup-options {
+      flex-direction: column;
+      /* align-items: center; */
+    }
+  }
+  

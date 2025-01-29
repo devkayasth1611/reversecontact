@@ -10,25 +10,26 @@ const BulkLookup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [bulkResults, setBulkResults] = useState([]);
   const [file, setFile] = useState(null);
-  const [statistics, setStatistics] = useState(() => {
-    // Retrieve stored statistics or initialize empty object
-    return (
-      JSON.parse(localStorage.getItem("statisticsData")) || {
-        duplicateCount: 0,
-        netNewCount: 0,
-        newEnrichedCount: 0,
-        creditUsed: 0,
-        remainingCredits: 1000,
-      }
-    );
-  });
+  
+  // Get logged-in user email
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userEmail = user?.email || "Guest";
 
-  // Retrieve email from localStorage
-  const userEmail = JSON.parse(localStorage.getItem("user"))?.email || "Guest";
+  // Retrieve user-specific statistics or initialize
+  const [statistics, setStatistics] = useState(() => {
+    const allStats = JSON.parse(localStorage.getItem("statisticsData")) || {};
+    return allStats[userEmail] || {
+      duplicateCount: 0,
+      netNewCount: 0,
+      newEnrichedCount: 0,
+      creditUsed: 0,
+      remainingCredits: 1000,
+      uploadedLinks: [],
+    };
+  });
 
   // Redirect to login if user is not authenticated
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
     if (!user) {
       window.location.href = "/login";
     }
@@ -40,14 +41,7 @@ const BulkLookup = () => {
       return;
     }
 
-    const isDuplicate = checkDuplicateFile(file.name);
-
-    if (isDuplicate) {
-      alert(`Duplicate file detected: ${file.name}.`);
-    }
-
     try {
-      // File processing logic remains the same
       const reader = new FileReader();
       reader.onload = async (e) => {
         const fileData = e.target.result;
@@ -98,12 +92,7 @@ const BulkLookup = () => {
           });
 
           setBulkResults(bulkData);
-          await saveStatistics(
-            file.name,
-            validLinks,
-            bulkData.length,
-            isDuplicate
-          );
+          await saveStatistics(file.name, validLinks, bulkData.length);
           alert("Bulk data fetched successfully!");
         } else {
           alert("No data found for the provided LinkedIn URLs.");
@@ -123,56 +112,50 @@ const BulkLookup = () => {
     }
   };
 
-  const checkDuplicateFile = (filename) => {
-    const previousUploads =
-      JSON.parse(localStorage.getItem("previousUploads")) || [];
-    if (previousUploads.includes(filename)) {
-      return true;
-    } else {
-      previousUploads.push(filename);
-      localStorage.setItem("previousUploads", JSON.stringify(previousUploads));
-      return false;
-    }
-  };
+  const saveStatistics = async (filename, validLinks, newEnrichedCount) => {
+    let userStats = JSON.parse(localStorage.getItem("statisticsData")) || {};
+    let userPreviousUploads = userStats[userEmail]?.uploadedLinks || [];
 
-  const saveStatistics = async (filename, validLinks, newEnrichedCount, isDuplicate) => {
-    const email = JSON.parse(localStorage.getItem("user"))?.email;
-  
-    const duplicateCount = isDuplicate
-      ? statistics.duplicateCount + 1
-      : statistics.duplicateCount;
-    const netNewCount = isDuplicate
-      ? statistics.netNewCount
-      : statistics.netNewCount + validLinks.length;
+    // Identify new and duplicate links
+    const newLinks = validLinks.filter((link) => !userPreviousUploads.includes(link));
+    const duplicateLinks = validLinks.filter((link) => userPreviousUploads.includes(link));
+
+    const duplicateCount = statistics.duplicateCount + duplicateLinks.length;
+    const netNewCount = statistics.netNewCount + newLinks.length;
+    const newTotalEnrichedCount = statistics.newEnrichedCount + newEnrichedCount;
     const creditUsed = statistics.creditUsed + newEnrichedCount * 5;
-    const remainingCredits = statistics.remainingCredits - newEnrichedCount * 5;
-  
+    const remainingCredits = Math.max(0, statistics.remainingCredits - newEnrichedCount * 5);
+
     const updatedStatistics = {
-      email, // Include the user's email
+      email: userEmail,
       filename,
       duplicateCount,
       netNewCount,
-      newEnrichedCount,
+      newEnrichedCount: newTotalEnrichedCount,
       creditUsed,
-      remainingCredits: Math.max(0, remainingCredits),
+      remainingCredits,
+      uploadedLinks: [...userPreviousUploads, ...newLinks], // Store uploaded links
     };
-  
+
+    userStats[userEmail] = updatedStatistics;
+    localStorage.setItem("statisticsData", JSON.stringify(userStats));
+
+    setStatistics(updatedStatistics);
+
     try {
       const response = await fetch("http://localhost:3000/bulkUpload/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedStatistics),
       });
-  
-      if (!response.ok)
-        throw new Error(`Error saving statistics: ${response.statusText}`);
+
+      if (!response.ok) throw new Error(`Error saving statistics: ${response.statusText}`);
       alert("Statistics saved successfully!");
     } catch (error) {
       console.error("Error saving statistics:", error);
       alert(`Error saving statistics: ${error.message}`);
     }
   };
-  
 
   const handleDownloadExcel = () => {
     if (bulkResults.length === 0) {
@@ -189,29 +172,20 @@ const BulkLookup = () => {
 
   return (
     <div className="dashboard">
-      {/* Sidebar Component */}
       <Sidebar userEmail={userEmail} />
 
-      {/* Main Content */}
       <div className="main-content">
-        {/* Header Section */}
         <div className="header">
           <h1 className="profile-lookup">Bulk Lookup</h1>
         </div>
 
-        {/* Explore Real-Time Data Section */}
         <div className="explore-section">
           <div className="file-upload-container">
             <label htmlFor="file-input" className="upload-label">
               Choose File
             </label>
             {file && <span className="file-name">{file.name}</span>}
-            <input
-              type="file"
-              id="file-input"
-              accept=".csv,.xlsx"
-              onChange={(e) => setFile(e.target.files[0])}
-            />
+            <input type="file" id="file-input" accept=".csv,.xlsx" onChange={(e) => setFile(e.target.files[0])} />
             <button className="upload-button" onClick={handleFileUpload}>
               {isLoading ? "Uploading..." : "Upload & Fetch"}
             </button>

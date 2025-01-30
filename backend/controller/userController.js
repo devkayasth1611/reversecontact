@@ -1,8 +1,8 @@
-const userSchema = require('../model/userModel');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const userSchema = require("../model/userModel");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
-
+// Add User
 exports.addUser = async (req, res) => {
   const { userEmail, userPassword, companyName, phoneNumber, roleId } = req.body;
 
@@ -11,16 +11,13 @@ exports.addUser = async (req, res) => {
   }
 
   try {
-    // Check for duplicate user
     const existingUser = await userSchema.findOne({ userEmail });
     if (existingUser) {
       return res.status(409).json({ message: "User already exists." });
     }
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(userPassword, 10);
 
-    // Create a new user
     const user = new userSchema({
       userEmail,
       userPassword: hashedPassword,
@@ -29,123 +26,122 @@ exports.addUser = async (req, res) => {
       roleId: parseInt(roleId, 10),
     });
 
-    const data = await user.save(); // Save user to DB
+    const data = await user.save();
     res.status(200).json({
       message: "User added successfully.",
-      data: data,
+      data,
     });
   } catch (err) {
-    console.error("Error while adding user:", err); // Debugging
-    res.status(500).json({
-      message: "Something went wrong while adding the user.",
-      error: err.message,
-    });
+    console.error("Error while adding user:", err);
+    res.status(500).json({ message: "Something went wrong.", error: err.message });
   }
 };
 
+// Add New User with Credits
 exports.addNewUser = async (req, res) => {
-  const { userEmail, userPassword, roleId, createdBy } = req.body;
+  const { userEmail, userPassword, roleId, createdBy, credits } = req.body;
 
   if (!userEmail || !userPassword || !createdBy) {
     return res.status(400).json({ message: "All fields are mandatory." });
   }
 
   try {
-    // Check for duplicate user
     const existingUser = await userSchema.findOne({ userEmail });
     if (existingUser) {
       return res.status(409).json({ message: "User already exists." });
     }
 
-    // Hash the password before saving
-    const saltRounds = 10; // Number of salt rounds for security
-    const hashedPassword = await bcrypt.hash(userPassword, saltRounds);
+    const hashedPassword = await bcrypt.hash(userPassword, 10);
 
-    // Create a new user
     const user = new userSchema({
       userEmail,
-      userPassword: hashedPassword, // Save the hashed password
+      userPassword: hashedPassword,
       roleId: parseInt(roleId, 10),
-      createdBy, // Store the creator's email
+      createdBy,
+      credits: credits || 1000, // Default to 1000 if not provided
     });
 
-    const data = await user.save(); // Save user to DB
-    res.status(200).json({
-      message: "User added successfully.",
-      data: data,
-    });
+    const data = await user.save();
+    res.status(200).json({ message: "User added successfully.", data });
   } catch (err) {
     console.error("Error while adding user:", err);
-    res.status(500).json({
-      message: "Something went wrong while adding the user.",
-      error: err.message,
-    });
+    res.status(500).json({ message: "Something went wrong.", error: err.message });
   }
 };
 
+// Update Credits
+exports.updateCredits = async (req, res) => {
+  const { userEmail, credits } = req.body;
 
+  if (!userEmail || credits == null) {
+    return res.status(400).json({ message: "Email and credits are required." });
+  }
 
-exports.getUser = (req, res) => {
-  userSchema.find({ roleId: 2 })
-    .then((data) => {
-      if (data.length === 0) {
-        return res.status(404).json({
-          message: 'No users found with roleId = 2.',
-        });
-      }
-      return res.status(200).json({
-        message: 'Users fetched successfully.',
-        data,
-      });
-    })
-    .catch((err) => {
-      res.status(500).json({
-        message: 'Error fetching users.',
-        error: err.message,
-      });
-    });
+  try {
+    const updatedUser = await userSchema.findOneAndUpdate(
+      { userEmail },
+      { credits },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    res.status(200).json({ message: "Credits updated successfully.", updatedUser });
+  } catch (error) {
+    console.error("Error updating credits:", error);
+    res.status(500).json({ message: "Failed to update credits.", error: error.message });
+  }
 };
 
+// Get Users with roleId = 2
+exports.getUser = async (req, res) => {
+  try {
+    const users = await userSchema.find({ roleId: 2 });
 
+    if (!users.length) {
+      return res.status(404).json({ message: "No users found with roleId = 2." });
+    }
 
+    res.status(200).json({ message: "Users fetched successfully.", data: users });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching users.", error: err.message });
+  }
+};
+
+// Login User
 exports.loginUser = async (req, res) => {
-  // console.log(req.body);  // This will log the body to ensure it's being received correctly
-
   try {
     const { userEmail, userPassword } = req.body;
 
     const user = await userSchema.findOne({ userEmail });
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found." });
     }
 
-    // Compare the password securely (bcrypt will compare hashed password)
     const isMatch = await bcrypt.compare(userPassword, user.userPassword);
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid email or password' });
+      return res.status(400).json({ message: "Invalid email or password." });
     }
 
-    // Generate JWT token if credentials are correct
     const token = jwt.sign(
       { id: user._id, email: user.userEmail },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: "1h" }
     );
 
-    return res.status(200).json({
-      message: 'Login successful',
+    res.status(200).json({
+      message: "Login successful.",
       token,
       user: {
         id: user._id,
         email: user.userEmail,
-        roleId: user.roleId,  // Send roleId back with the response
+        roleId: user.roleId,
       },
     });
   } catch (error) {
-    console.error('Login error:', error); // Log the error to get more details
-    return res.status(500).json({
-      message: 'Server error',
-      error: error.message,
-    });
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Server error.", error: error.message });
   }
 };

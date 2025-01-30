@@ -4,7 +4,6 @@ import "../css/ProfileLookup.css"; // Add custom styles
 
 const UserStatistics = () => {
   const [statistics, setStatistics] = useState([]);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Retrieve the logged-in user's email
@@ -20,10 +19,7 @@ const UserStatistics = () => {
 
   useEffect(() => {
     const fetchUserStatistics = async () => {
-      if (!userEmail || userEmail === "Guest") {
-        setError("User is not logged in. Please log in to view statistics.");
-        return;
-      }
+      if (!userEmail || userEmail === "Guest") return; // Exit if no user email
 
       setLoading(true);
 
@@ -33,20 +29,17 @@ const UserStatistics = () => {
           `http://localhost:3000/bulkUpload/userStatistics?email=${userEmail}`
         );
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch statistics: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error("Failed to fetch statistics");
 
         const data = await response.json();
 
         if (data.length === 0) {
-          setError("No statistics found for this user.");
+          setStatistics([]); // Ensure statistics is an empty array
         } else {
           setStatistics(data);
-          setError("");
         }
       } catch (err) {
-        setError(err.message);
+        console.error("Error fetching statistics:", err); // Log the error but don't show in UI
       } finally {
         setLoading(false);
       }
@@ -66,38 +59,45 @@ const UserStatistics = () => {
         <div className="header">
           <h1 className="profile-lookup">User Statistics</h1>
         </div>
+
         <div className="statistics-page">
           {loading ? (
             <p>Loading statistics...</p>
-          ) : error ? (
-            <p style={{ color: "red" }}>{error}</p>
-          ) : statistics.length > 0 ? (
-            <table>
-              <thead>
-                <tr>
-                  <th>File Name</th>
-                  <th>Duplicate Count</th>
-                  <th>Net New Count</th>
-                  <th>New Enriched Count</th>
-                  <th>Credits Used</th>
-                  <th>Remaining Credits</th>
-                </tr>
-              </thead>
-              <tbody>
-                {statistics.map((stat, index) => (
-                  <tr key={index}>
-                    <td>{stat.filename}</td>
-                    <td>{stat.duplicateCount}</td>
-                    <td>{stat.netNewCount}</td>
-                    <td>{stat.newEnrichedCount}</td>
-                    <td>{stat.creditUsed}</td>
-                    <td>{stat.remainingCredits}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           ) : (
-            <p>No statistics available.</p>
+            <>
+              <table>
+                <thead>
+                  <tr>
+                    <th>File Name / LinkedIn Link</th>
+                    <th>Duplicate Count</th>
+                    <th>Net New Count</th>
+                    <th>New Enriched Count</th>
+                    <th>Credits Used</th>
+                    <th>Remaining Credits</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {statistics.length > 0 ? (
+                    statistics.map((stat, index) => (
+                      <tr key={index}>
+                        <td>{stat.filename}</td>
+                        <td>{stat.duplicateCount}</td>
+                        <td>{stat.netNewCount}</td>
+                        <td>{stat.newEnrichedCount}</td>
+                        <td>{stat.creditUsed}</td>
+                        <td>{stat.remainingCredits}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: "center", color: "gray" }}>
+                        No statistics available.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </>
           )}
         </div>
       </div>

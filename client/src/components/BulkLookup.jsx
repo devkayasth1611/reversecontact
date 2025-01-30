@@ -1,21 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Papa from "papaparse"; // For CSV parsing
-import * as XLSX from "xlsx"; // For Excel file parsing
-import Sidebar from "../components/Sidebar"; // Import Sidebar
+import Papa from "papaparse";
+import * as XLSX from "xlsx";
+import Sidebar from "../components/Sidebar";
 import "../css/ProfileLookup.css";
 
 const BulkLookup = () => {
-  const navigate = useNavigate(); // For redirecting to login after sign-out
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [bulkResults, setBulkResults] = useState([]);
   const [file, setFile] = useState(null);
-  
-  // Get logged-in user email
+
   const user = JSON.parse(localStorage.getItem("user"));
   const userEmail = user?.email || "Guest";
-
-  // Retrieve user-specific statistics or initialize
   const [statistics, setStatistics] = useState(() => {
     const allStats = JSON.parse(localStorage.getItem("statisticsData")) || {};
     return allStats[userEmail] || {
@@ -28,12 +25,54 @@ const BulkLookup = () => {
     };
   });
 
-  // Redirect to login if user is not authenticated
   useEffect(() => {
     if (!user) {
       window.location.href = "/login";
     }
   }, []);
+
+  // Fetch user credits from the database
+  const fetchUserCredits = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/users/user`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch lookup credits");
+
+      const data = await response.json();
+      const currentUser = data.data.find((u) => u.userEmail === userEmail);
+
+      if (currentUser) {
+        setStatistics((prevState) => ({
+          ...prevState,
+          remainingCredits: currentUser.credits,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching user credits:", error);
+    }
+  };
+
+  // Function to update user credits in the backend
+  const updateUserCredits = async (newCredits) => {
+    try {
+      await fetch(`http://localhost:3000/users/update-credits`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({ userEmail, credits: newCredits }),
+      });
+    } catch (error) {
+      console.error("Error updating user credits:", error);
+    }
+  };
 
   const handleFileUpload = async () => {
     if (!file) {
@@ -67,35 +106,47 @@ const BulkLookup = () => {
 
         setIsLoading(true);
 
-        // API call
-        const apiUrl = `http://localhost:3000/mobileEnrichments/mobileEnrichment?linkedin_url=${validLinks.join(
-          ","
-        )}`;
-        const response = await fetch(apiUrl);
+        try {
+          const apiUrl = `http://localhost:3000/mobileEnrichments/mobileEnrichment?linkedin_url=${validLinks.join(
+            ","
+          )}`;
+          const response = await fetch(apiUrl);
 
-        if (!response.ok) throw new Error("Failed to fetch bulk data");
+          if (!response.ok) throw new Error("Failed to fetch bulk data");
 
-        const data = await response.json();
+          const data = await response.json();
 
-        if (data.data && data.data.length > 0) {
-          const bulkData = validLinks.map((link, index) => {
-            const result = data.data[index];
-            return {
-              linkedin_url: link,
-              full_name: result?.full_name || "Not Available",
-              lead_location: Array.isArray(result?.lead_location)
-                ? result.lead_location.join(", ")
-                : result?.lead_location || "Not Available",
-              mobile_1: result?.mobile_1 || "Not Available",
-              mobile_2: result?.mobile_2 || "Not Available",
-            };
-          });
+          if (data.data && data.data.length > 0) {
+            const bulkData = validLinks.map((link, index) => {
+              const result = data.data[index];
+              return {
+                linkedin_url: link,
+                full_name: result?.full_name || "Not Available",
+                lead_location: Array.isArray(result?.lead_location)
+                  ? result.lead_location.join(", ")
+                  : result?.lead_location || "Not Available",
+                mobile_1: result?.mobile_1 || "Not Available",
+                mobile_2: result?.mobile_2 || "Not Available",
+              };
+            });
 
-          setBulkResults(bulkData);
-          await saveStatistics(file.name, validLinks, bulkData.length);
-          alert("Bulk data fetched successfully!");
-        } else {
-          alert("No data found for the provided LinkedIn URLs.");
+            setBulkResults(bulkData);
+
+            // Save statistics AFTER bulk data is fetched
+            await saveStatistics(file.name, validLinks);
+
+            const newCredits = statistics.remainingCredits - 25; // Deduct 25 credits for file upload
+            await updateUserCredits(newCredits);
+
+            alert("Bulk data fetched successfully and statistics saved!");
+          } else {
+            alert("No data found for the provided LinkedIn URLs.");
+          }
+        } catch (error) {
+          console.error("Error fetching bulk data:", error);
+          alert("Error fetching bulk data. Please try again later.");
+        } finally {
+          setIsLoading(false);
         }
       };
 
@@ -107,34 +158,31 @@ const BulkLookup = () => {
     } catch (error) {
       console.error("Error processing file:", error);
       alert("Error processing file. Please try again later.");
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const saveStatistics = async (filename, validLinks, newEnrichedCount) => {
+  const saveStatistics = async (filename, validLinks) => {
     let userStats = JSON.parse(localStorage.getItem("statisticsData")) || {};
     let userPreviousUploads = userStats[userEmail]?.uploadedLinks || [];
 
-    // Identify new and duplicate links
     const newLinks = validLinks.filter((link) => !userPreviousUploads.includes(link));
     const duplicateLinks = validLinks.filter((link) => userPreviousUploads.includes(link));
 
     const duplicateCount = statistics.duplicateCount + duplicateLinks.length;
     const netNewCount = statistics.netNewCount + newLinks.length;
-    const newTotalEnrichedCount = statistics.newEnrichedCount + newEnrichedCount;
-    const creditUsed = statistics.creditUsed + newEnrichedCount * 5;
-    const remainingCredits = Math.max(0, statistics.remainingCredits - newEnrichedCount * 5);
+
+    const creditUsed = statistics.creditUsed + 25; // Deduct 25 credits per file upload
+    const remainingCredits = Math.max(0, statistics.remainingCredits - 25);
 
     const updatedStatistics = {
       email: userEmail,
       filename,
       duplicateCount,
       netNewCount,
-      newEnrichedCount: newTotalEnrichedCount,
+      newEnrichedCount: statistics.newEnrichedCount,
       creditUsed,
       remainingCredits,
-      uploadedLinks: [...userPreviousUploads, ...newLinks], // Store uploaded links
+      uploadedLinks: [...userPreviousUploads, ...newLinks],
     };
 
     userStats[userEmail] = updatedStatistics;

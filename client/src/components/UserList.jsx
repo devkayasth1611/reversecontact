@@ -53,6 +53,7 @@ const UserList = () => {
                 <th>#</th>
                 <th>Email</th>
                 <th>Password</th>
+                <th>Credits</th>
               </tr>
             </thead>
             <tbody>
@@ -61,6 +62,7 @@ const UserList = () => {
                   <td>{index + 1}</td>
                   <td>{user.userEmail}</td>
                   <td>{user.userPassword}</td> {/* Display password (not secure) */}
+                  <td>{user.credits}</td>
                 </tr>
               ))}
             </tbody>

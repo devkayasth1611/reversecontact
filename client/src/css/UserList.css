@@ -22,7 +22,8 @@
   }
   
   .add-user-form-container input[type="email"],
-  .add-user-form-container input[type="password"] {
+  .add-user-form-container input[type="password"],
+  .add-user-form-container input[type="number"] {
     padding: 12px 15px;
     font-size: 16px;
     border: 1px solid #dcdcdc;
@@ -33,7 +34,8 @@
   }
   
   .add-user-form-container input[type="email"]:focus,
-  .add-user-form-container input[type="password"]:focus {
+  .add-user-form-container input[type="password"]:focus,
+  .add-user-form-container input[type="number"]:focus {
     border-color: #007bff;
     outline: none;
     box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
@@ -76,7 +78,8 @@
   }
   
   .add-user-form-container input[type="email"]:hover,
-  .add-user-form-container input[type="password"]:hover {
+  .add-user-form-container input[type="password"]:hover,
+  .add-user-form-container input[type="number"]:hover{
     background-color: #f1f1f1;
   }
 

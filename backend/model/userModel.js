@@ -7,6 +7,7 @@ const userSchema = new Schema(
       type: String,
       required: true,
       trim: true,
+      unique: true,
     },
     userPassword: {
       type: String,
@@ -28,8 +29,11 @@ const userSchema = new Schema(
     },
     createdBy: {
       type: String, // Stores the email of the user who added this user
-      // required: true,
       trim: true,
+    },
+    credits: {
+      type: Number,
+      default: 1000, // Default credits for a new user
     },
   },
   {

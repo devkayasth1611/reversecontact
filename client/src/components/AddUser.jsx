@@ -6,6 +6,7 @@ import "../css/UserList.css";
 const AddUser = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [credits, setCredits] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -29,20 +30,21 @@ const AddUser = () => {
 
   const handleAddUser = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      setErrorMessage("Both email and password are required.");
+    if (!email || !password || !credits) {
+      setErrorMessage("All email and password are required.");
       return;
     }
   
     setIsSubmitting(true);
   
-    const createdBy = JSON.parse(localStorage.getItem("user"))?.email || ""; // Get the logged-in user's email
+    const createdBy = JSON.parse(localStorage.getItem("user"))?.email || "";
   
     const userData = {
       userEmail: email,
       userPassword: password,
-      roleId: 2, // Regular user role
-      createdBy, // Store the creator's email
+      roleId: 2,
+      createdBy,
+      credits: credits, // Assign default credits
     };
   
     try {
@@ -54,7 +56,7 @@ const AddUser = () => {
   
       const data = await response.json();
       if (response.ok) {
-        navigate("/user-list"); // Redirect after adding user
+        navigate("/user-list");
       } else {
         setErrorMessage(data.message || "Error adding user.");
       }
@@ -64,6 +66,7 @@ const AddUser = () => {
       setIsSubmitting(false);
     }
   };
+  
   
 
   return (
@@ -96,6 +99,15 @@ const AddUser = () => {
                   required
                 />
               </div>
+              <div>
+                <input
+                  type="number"
+                  value={credits}
+                  onChange={(e) => setCredits(e.target.value)}
+                  placeholder="Default Credits"
+                />
+              </div>
+
               {errorMessage && <p className="error-message">{errorMessage}</p>}
               <div>
                 <button type="submit" disabled={isSubmitting}>

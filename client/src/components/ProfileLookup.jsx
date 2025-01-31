@@ -56,7 +56,7 @@ const ProfileLookup = () => {
   const updateUserCredits = async (newCredits) => {
     try {
       await fetch(`http://localhost:3000/users/update-credits`, {
-        method: "POST",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user.token}`,

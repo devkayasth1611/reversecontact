@@ -20,7 +20,7 @@ const BulkLookup = () => {
       netNewCount: 0,
       newEnrichedCount: 0,
       creditUsed: 0,
-      remainingCredits: 1000,
+      remainingCredits,
       uploadedLinks: [],
     };
   });
@@ -62,7 +62,7 @@ const BulkLookup = () => {
   const updateUserCredits = async (newCredits) => {
     try {
       await fetch(`http://localhost:3000/users/update-credits`, {
-        method: "POST",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user.token}`,

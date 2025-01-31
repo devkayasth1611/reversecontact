@@ -1,4 +1,10 @@
 /* General Container */
+
+.dashboard {
+  display: flex;
+  flex-wrap: wrap;
+}
+
 .signup-container {
     display: flex;
     height: 850px;

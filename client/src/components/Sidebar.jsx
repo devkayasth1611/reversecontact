@@ -6,11 +6,11 @@ const Sidebar = () => {
   const [userEmail, setUserEmail] = useState(null); // State to store user email
   const location = useLocation(); 
   const navigate = useNavigate(); // Import useNavigate for navigation
-  const roleId = localStorage.getItem("roleId"); // Fetch roleId from localStorage
+  const roleId = sessionStorage.getItem("roleId"); // Fetch roleId from sessionStorage
 
-  // useEffect hook to fetch user data from localStorage
+  // useEffect hook to fetch user data from sessionStorage
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(sessionStorage.getItem("user"));
     console.log("Fetched user:", user); // Debugging line
     
     if (user && user.email) {
@@ -43,8 +43,8 @@ const Sidebar = () => {
 
   const handleMenuClick = (menuItem) => {
     if (menuItem === "Sign out") {
-      localStorage.removeItem("user");
-      localStorage.removeItem("roleId"); // Clear roleId on logout
+      sessionStorage.removeItem("user");
+      sessionStorage.removeItem("roleId"); // Clear roleId on logout
       navigate("/login"); // Use navigate to redirect to login
     }
   };
@@ -54,7 +54,7 @@ const Sidebar = () => {
       <div className="user-info">
         <div className="avatar-container">
           <img
-            src="https://via.placeholder.com/100"
+            src="/profile.png"
             alt="Profile"
             className="avatar"
           />

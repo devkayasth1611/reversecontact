@@ -10,16 +10,16 @@ function Login() {
 
   const navigate = useNavigate();
 
- const handleLogin = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     if (!email || !password) {
       setErrorMessage("Both email and password are required.");
       return;
     }
-
+  
     setIsSubmitting(true);
-
+  
     try {
       const response = await fetch("http://localhost:3000/users/login", {
         method: "POST",
@@ -31,17 +31,17 @@ function Login() {
           userPassword: password,
         }),
       });
-
+  
       const result = await response.json();
-
+  
       if (response.ok) {
         const user = result.user;
-
+  
         if (user) {
-          // Store user data and roleId
-          localStorage.setItem("user", JSON.stringify(user));
-          localStorage.setItem("roleId", user.roleId);
-
+          // Store user data and roleId in sessionStorage instead of localStorage
+          sessionStorage.setItem("user", JSON.stringify(user));
+          sessionStorage.setItem("roleId", user.roleId);
+  
           // Navigate based on roleId
           if (parseInt(user.roleId) === 1) {
             navigate("/add-user");
@@ -60,6 +60,7 @@ function Login() {
       setIsSubmitting(false);
     }
   };
+  
 
   return (
     <div className="login-container">

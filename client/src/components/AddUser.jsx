@@ -11,17 +11,17 @@ const AddUser = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const userEmail = JSON.parse(localStorage.getItem("user"))?.email || "Guest";
+  const userEmail = JSON.parse(sessionStorage.getItem("user"))?.email || "Guest";
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(sessionStorage.getItem("user"));
     if (!user) {
       window.location.href = "/login";
     }
   }, []);
   // Check roleId on page load
   useEffect(() => {
-    const roleId = localStorage.getItem("roleId");
+    const roleId = sessionStorage.getItem("roleId");
     if (roleId !== "1") {
       // If the user is not an admin (roleId is not 1), redirect them
       navigate("/profile-lookup"); // Redirect to profile page for non-admin users
@@ -30,21 +30,21 @@ const AddUser = () => {
 
   const handleAddUser = async (e) => {
     e.preventDefault();
-    if (!email || !password || !credits) {
+    if (!email || !password) {
       setErrorMessage("All email and password are required.");
       return;
     }
   
     setIsSubmitting(true);
   
-    const createdBy = JSON.parse(localStorage.getItem("user"))?.email || "";
+    const createdBy = JSON.parse(sessionStorage.getItem("user"))?.email || "";
   
     const userData = {
       userEmail: email,
       userPassword: password,
       roleId: 2,
       createdBy,
-      credits: credits, // Assign default credits
+      credits: 2000, // Assign default credits
     };
   
     try {
@@ -99,14 +99,14 @@ const AddUser = () => {
                   required
                 />
               </div>
-              <div>
+              {/* <div>
                 <input
                   type="number"
                   value={credits}
                   onChange={(e) => setCredits(e.target.value)}
                   placeholder="Default Credits"
                 />
-              </div>
+              </div> */}
 
               {errorMessage && <p className="error-message">{errorMessage}</p>}
               <div>

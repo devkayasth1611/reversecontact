@@ -8,7 +8,7 @@ const Statistics = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const loggedInUserEmail = JSON.parse(localStorage.getItem("user"))?.email || "Guest";
+  const loggedInUserEmail = JSON.parse(sessionStorage.getItem("user"))?.email || "Guest";
 
   useEffect(() => {
     const fetchUserList = async () => {

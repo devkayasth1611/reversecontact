@@ -9,7 +9,7 @@ const ProfileLookup = () => {
   const [showModal, setShowModal] = useState(false);
   const [lookupCount, setLookupCount] = useState(0);
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(sessionStorage.getItem("user"));
   const userEmail = user?.email || "Guest";
 
   useEffect(() => {
@@ -45,9 +45,9 @@ const ProfileLookup = () => {
     }
   };
 
-  // Fetch user statistics from localStorage
+  // Fetch user statistics from sessionStorage
   const fetchUserStatistics = () => {
-    let userStats = JSON.parse(localStorage.getItem("statisticsData")) || {};
+    let userStats = JSON.parse(sessionStorage.getItem("statisticsData")) || {};
     const userStat = userStats[userEmail] || {};
     setLookupCount(userStat.remainingCredits || lookupCount);
   };
@@ -94,8 +94,8 @@ const ProfileLookup = () => {
         setResultData(data.data);
         setShowModal(true);
 
-        // Fetch existing user statistics from localStorage
-        let userStats = JSON.parse(localStorage.getItem("statisticsData")) || {};
+        // Fetch existing user statistics from sessionStorage
+        let userStats = JSON.parse(sessionStorage.getItem("statisticsData")) || {};
         let userPreviousSearches = userStats[userEmail]?.uploadedLinks || [];
 
         const isDuplicate = userPreviousSearches.includes(linkedinLink);
@@ -119,7 +119,7 @@ const ProfileLookup = () => {
 
         // Save updated statistics locally
         userStats[userEmail] = updatedStatistics;
-        localStorage.setItem("statisticsData", JSON.stringify(userStats));
+        sessionStorage.setItem("statisticsData", JSON.stringify(userStats));
 
         // Save updated statistics to backend
         await fetch(`http://localhost:3000/bulkUpload/add`, {
@@ -131,7 +131,7 @@ const ProfileLookup = () => {
           body: JSON.stringify(updatedStatistics),
         });
 
-        // Update backend and localStorage with remaining credits
+        // Update backend and sessionStorage with remaining credits
         await updateUserCredits(remainingCredits);
 
         // Update UI count

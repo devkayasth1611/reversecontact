@@ -8,7 +8,7 @@ const UserList = () => {
   const [error, setError] = useState(null);
   const [creditUpdates, setCreditUpdates] = useState({});
 
-  const userEmail = JSON.parse(localStorage.getItem("user"))?.email || "Guest";
+  const userEmail = JSON.parse(sessionStorage.getItem("user"))?.email || "Guest";
 
   useEffect(() => {
     const fetchUsers = async () => {

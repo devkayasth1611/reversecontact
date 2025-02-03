@@ -11,16 +11,16 @@ const BulkLookup = () => {
   const [bulkResults, setBulkResults] = useState([]);
   const [file, setFile] = useState(null);
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(sessionStorage.getItem("user"));
   const userEmail = user?.email || "Guest";
   const [statistics, setStatistics] = useState(() => {
-    const allStats = JSON.parse(localStorage.getItem("statisticsData")) || {};
+    const allStats = JSON.parse(sessionStorage.getItem("statisticsData")) || {};
     return allStats[userEmail] || {
       duplicateCount: 0,
       netNewCount: 0,
       newEnrichedCount: 0,
       creditUsed: 0,
-      remainingCredits,
+      remainingCredits:2000,
       uploadedLinks: [],
     };
   });
@@ -162,7 +162,7 @@ const BulkLookup = () => {
   };
 
   const saveStatistics = async (filename, validLinks) => {
-    let userStats = JSON.parse(localStorage.getItem("statisticsData")) || {};
+    let userStats = JSON.parse(sessionStorage.getItem("statisticsData")) || {};
     let userPreviousUploads = userStats[userEmail]?.uploadedLinks || [];
 
     const newLinks = validLinks.filter((link) => !userPreviousUploads.includes(link));
@@ -186,7 +186,7 @@ const BulkLookup = () => {
     };
 
     userStats[userEmail] = updatedStatistics;
-    localStorage.setItem("statisticsData", JSON.stringify(userStats));
+    sessionStorage.setItem("statisticsData", JSON.stringify(userStats));
 
     setStatistics(updatedStatistics);
 

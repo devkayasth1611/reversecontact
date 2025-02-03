@@ -61,6 +61,9 @@ const SignUp = () => {
       const data = await response.json();
 
       if (response.ok) {
+        // Store user email temporarily in session storage
+        sessionStorage.setItem("userEmail", email);
+
         // Reset form and navigate to login
         setEmail("");
         setPassword("");

@@ -7,11 +7,11 @@ const UserStatistics = () => {
   const [loading, setLoading] = useState(false);
 
   // Retrieve the logged-in user's email
-  const userEmail = JSON.parse(localStorage.getItem("user"))?.email || "Guest";
+  const userEmail = JSON.parse(sessionStorage.getItem("user"))?.email || "Guest";
 
   // Redirect to login if the user is not authenticated
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(sessionStorage.getItem("user"));
     if (!user) {
       window.location.href = "/login";
     }

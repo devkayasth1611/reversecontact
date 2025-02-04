@@ -3,46 +3,40 @@ const BulkUpload = require("../model/bulkUploadModel");
 // Add Bulk Upload Entry
 exports.addBulkUploadEntry = async (req, res) => {
   try {
-    // Validate the data structure
     const {
       filename,
+      duplicateCount = 0,
+      netNewCount = 0,
+      newEnrichedCount = 0,
+      creditUsed = 0,
+      remainingCredits = 0,
+    } = req.body;
+
+    if (!filename) {
+      return res.status(400).json({ message: "Filename is required" });
+    }
+
+    const bulkUploadData = new BulkUpload({
+      ...req.body,
       duplicateCount,
       netNewCount,
       newEnrichedCount,
       creditUsed,
       remainingCredits,
-    } = req.body;
-    if (
-      !filename ||
-      !duplicateCount ||
-      !netNewCount ||
-      !newEnrichedCount ||
-      !creditUsed ||
-      !remainingCredits
-    ) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
+    });
 
-    // Log the incoming data for debugging
-    console.log("Received bulk upload data:", req.body);
-
-    const bulkUploadData = new BulkUpload(req.body);
     await bulkUploadData.save();
 
-    res
-      .status(201)
-      .json({
-        message: "Bulk upload entry saved successfully",
-        data: bulkUploadData,
-      });
+    res.status(201).json({
+      message: "Bulk upload entry saved successfully",
+      data: bulkUploadData,
+    });
   } catch (error) {
     console.error("Error saving bulk upload entry:", error);
-    res
-      .status(500)
-      .json({
-        message: "Error saving bulk upload entry",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error saving bulk upload entry",
+      error: error.message,
+    });
   }
 };
 
@@ -67,7 +61,9 @@ exports.getUserStatisticsByEmail = async (req, res) => {
   try {
     const userStatistics = await BulkUpload.find({ email }); // Fetch records for the given email
     if (!userStatistics || userStatistics.length === 0) {
-      return res.status(404).json({ message: "No statistics found for this user" });
+      return res
+        .status(404)
+        .json({ message: "No statistics found for this user" });
     }
     res.status(200).json(userStatistics);
   } catch (error) {

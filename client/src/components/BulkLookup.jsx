@@ -15,23 +15,26 @@ const BulkLookup = () => {
   const userEmail = user?.email || "Guest";
   const [statistics, setStatistics] = useState(() => {
     const allStats = JSON.parse(sessionStorage.getItem("statisticsData")) || {};
-    return allStats[userEmail] || {
-      duplicateCount: 0,
-      netNewCount: 0,
-      newEnrichedCount: 0,
-      creditUsed: 0,
-      remainingCredits:2000,
-      uploadedLinks: [],
-    };
+    return (
+      allStats[userEmail] || {
+        duplicateCount: 0,
+        netNewCount: 0,
+        newEnrichedCount: 0,
+        creditUsed: 0,
+        remainingCredits: 0,
+        uploadedLinks: [],
+      }
+    );
   });
 
   useEffect(() => {
     if (!user) {
       window.location.href = "/login";
+    } else {
+      fetchUserCredits();
     }
   }, []);
 
-  // Fetch user credits from the database
   const fetchUserCredits = async () => {
     try {
       const response = await fetch(`http://localhost:3000/users/user`, {
@@ -58,7 +61,6 @@ const BulkLookup = () => {
     }
   };
 
-  // Function to update user credits in the backend
   const updateUserCredits = async (newCredits) => {
     try {
       await fetch(`http://localhost:3000/users/update-credits`, {
@@ -77,6 +79,11 @@ const BulkLookup = () => {
   const handleFileUpload = async () => {
     if (!file) {
       alert("Please upload a file first.");
+      return;
+    }
+
+    if (statistics.remainingCredits <= 0) {
+      alert("You have no remaining credits. Please contact support.");
       return;
     }
 
@@ -131,8 +138,6 @@ const BulkLookup = () => {
             });
 
             setBulkResults(bulkData);
-
-            // Save statistics AFTER bulk data is fetched
             await saveStatistics(file.name, validLinks);
 
             const newCredits = statistics.remainingCredits - 25; // Deduct 25 credits for file upload
@@ -162,16 +167,21 @@ const BulkLookup = () => {
   };
 
   const saveStatistics = async (filename, validLinks) => {
-    let userStats = JSON.parse(sessionStorage.getItem("statisticsData")) || {};
-    let userPreviousUploads = userStats[userEmail]?.uploadedLinks || [];
+    const userStats =
+      JSON.parse(sessionStorage.getItem("statisticsData")) || {};
+    const userPreviousUploads = userStats[userEmail]?.uploadedLinks || [];
 
-    const newLinks = validLinks.filter((link) => !userPreviousUploads.includes(link));
-    const duplicateLinks = validLinks.filter((link) => userPreviousUploads.includes(link));
+    const newLinks = validLinks.filter(
+      (link) => !userPreviousUploads.includes(link)
+    );
+    const duplicateLinks = validLinks.filter((link) =>
+      userPreviousUploads.includes(link)
+    );
 
     const duplicateCount = statistics.duplicateCount + duplicateLinks.length;
     const netNewCount = statistics.netNewCount + newLinks.length;
 
-    const creditUsed = statistics.creditUsed + 25; // Deduct 25 credits per file upload
+    const creditUsed = statistics.creditUsed + 25;
     const remainingCredits = Math.max(0, statistics.remainingCredits - 25);
 
     const updatedStatistics = {
@@ -179,7 +189,7 @@ const BulkLookup = () => {
       filename,
       duplicateCount,
       netNewCount,
-      newEnrichedCount: statistics.newEnrichedCount,
+      newEnrichedCount: statistics.newEnrichedCount || 0,
       creditUsed,
       remainingCredits,
       uploadedLinks: [...userPreviousUploads, ...newLinks],
@@ -197,7 +207,8 @@ const BulkLookup = () => {
         body: JSON.stringify(updatedStatistics),
       });
 
-      if (!response.ok) throw new Error(`Error saving statistics: ${response.statusText}`);
+      if (!response.ok)
+        throw new Error(`Error saving statistics: ${response.statusText}`);
       alert("Statistics saved successfully!");
     } catch (error) {
       console.error("Error saving statistics:", error);
@@ -233,7 +244,12 @@ const BulkLookup = () => {
               Choose File
             </label>
             {file && <span className="file-name">{file.name}</span>}
-            <input type="file" id="file-input" accept=".csv,.xlsx" onChange={(e) => setFile(e.target.files[0])} />
+            <input
+              type="file"
+              id="file-input"
+              accept=".csv,.xlsx"
+              onChange={(e) => setFile(e.target.files[0])}
+            />
             <button className="upload-button" onClick={handleFileUpload}>
               {isLoading ? "Uploading..." : "Upload & Fetch"}
             </button>

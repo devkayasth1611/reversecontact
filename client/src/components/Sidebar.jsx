@@ -23,9 +23,9 @@ const Sidebar = () => {
 
   // Define menu items for both roles
   const adminMenuItems = [
-    { name: "Statistic", path: "/statistic" },
     { name: "Add User", path: "/add-user" },
     { name: "User List", path: "/user-list" },
+    { name: "Statistic", path: "/statistic" },
     { name: "Sign out" },
   ];
 
@@ -38,8 +38,23 @@ const Sidebar = () => {
     { name: "Sign out" },
   ];
 
+  const superAdminItems = [
+    { name: "All User", path: "/all-user" },
+    { name: "All User Statistic", path: "/all-user-statistics" },
+    // { name: "API Documentation" },
+    // { name: "Plans & Pricing" },
+    { name: "Sign out" },
+  ];
+
   // Choose menu items based on roleId
-  const menuItems = roleId === "1" ? adminMenuItems : userMenuItems;
+  const menuItems = roleId === "1" 
+  ? adminMenuItems 
+  : roleId === "2" 
+  ? userMenuItems 
+  : roleId === "3" 
+  ? superAdminItems 
+  : [];
+
 
   const handleMenuClick = (menuItem) => {
     if (menuItem === "Sign out") {

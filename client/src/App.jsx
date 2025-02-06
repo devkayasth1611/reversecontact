@@ -18,6 +18,8 @@ import AddUser from "./components/AddUser";
 import Statistic from "./components/Statistic";
 import UserList from "./components/userList";
 import UserStatistics from "./components/UserStatistics";
+import AllUser from "./components/AllUser";
+import AllStatistics from "./components/AllStatistics";
 
 import "./App.css";
 
@@ -31,7 +33,9 @@ function App() {
     "/statistic",
     "/add-user",
     "/user-list",
-    "/UserStatistics"
+    "/UserStatistics",
+    "/all-user",
+    "/all-user-statistics",
   ]; // Paths without Header/Footer
 
   const isExcluded = excludePaths.includes(location.pathname); // Check if current path matches
@@ -48,6 +52,8 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/add-user" element={<AddUser />} />
         <Route path="/user-list" element={<UserList />} />
+        <Route path="/all-user" element={<AllUser />} />
+        <Route path="/all-user-statistics" element={<AllStatistics />} />
         <Route path="/UserStatistics" element={<UserStatistics />} />
         <Route path="/mobile-enrichment" element={<MobileEnrichment />} />
         <Route path="/linkedin-contact-verification" element={<LinkedinContactVerification />} />

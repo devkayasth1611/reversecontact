@@ -7,5 +7,6 @@ router.post("/newuser", userController.addNewUser);
 router.patch("/update-credits", userController.updateCredits);
 router.get("/user", userController.getUser);
 router.post("/login", userController.loginUser);
+router.get("/getAllUser", userController.getAllUser);
 
 module.exports = router;

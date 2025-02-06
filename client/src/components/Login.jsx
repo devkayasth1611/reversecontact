@@ -45,6 +45,9 @@ function Login() {
           // Navigate based on roleId
           if (parseInt(user.roleId) === 1) {
             navigate("/add-user");
+          }
+          else if(parseInt(user.roleId) === 3){
+            navigate("/all-user");
           } else {
             navigate("/profile-lookup");
           }

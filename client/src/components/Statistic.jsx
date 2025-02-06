@@ -55,7 +55,7 @@ const Statistics = () => {
     <div className="dashboard">
       <Sidebar userEmail={loggedInUserEmail} />
       <div className="main-content">
-        <h1 className="profile-lookup">User Statistics</h1>
+        <h1 className="profile-lookup">All User Statistics</h1>
         {loading ? (
           <p>Loading statistics...</p>
         ) : error ? (

@@ -44,7 +44,7 @@ const AddUser = () => {
       userPassword: password,
       roleId: 2,
       createdBy,
-      credits: 2000, // Assign default credits
+      credits: 0, // Assign default credits
     };
   
     try {

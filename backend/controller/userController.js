@@ -58,7 +58,7 @@ exports.addNewUser = async (req, res) => {
       userPassword: hashedPassword,
       roleId: parseInt(roleId, 10),
       createdBy,
-      credits: credits || 1000, // Default to 1000 if not provided
+      credits: credits || 0, 
     });
 
     const data = await user.save();
@@ -146,9 +146,9 @@ exports.loginUser = async (req, res) => {
   }
 };
 
-exports.getAllUser = async (req, res) => {
+exports.getAllAdmin = async (req, res) => {
   try {
-    const users = await userSchema.find();
+    const users = await userSchema.find({ roleId: 1 });
 
     if (!users.length) {
       return res.status(404).json({ message: "No users found." });

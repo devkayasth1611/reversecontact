@@ -7,35 +7,47 @@ const UserList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [creditUpdates, setCreditUpdates] = useState({});
+  const [userCredits, setUserCredits] = useState(0); // Store logged-in user's credits
 
   const userEmail = JSON.parse(sessionStorage.getItem("user"))?.email || "Guest";
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/users/user");
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
-
-        const { data } = await response.json();
-
-        // Filter users based on the logged-in user's email
-        const filteredUsers = data.filter(
-          (user) => user.createdBy === userEmail
-        );
-
-        setUsers(filteredUsers);
-      } catch (error) {
-        setError(error.message || "Failed to fetch user data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUsers();
+    fetchUserCredits(); // Fetch credits for logged-in user
   }, [userEmail]);
+
+  // Fetch user list (Filtered by createdBy)
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/users/user");
+      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+
+      const { data } = await response.json();
+      const filteredUsers = data.filter((user) => user.createdBy === userEmail);
+      setUsers(filteredUsers);
+    } catch (error) {
+      setError(error.message || "Failed to fetch user data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch credits for the logged-in user
+  const fetchUserCredits = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/users/getAllAdmin");
+      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+
+      const { data } = await response.json();
+      const loggedInUser = data.find((user) => user.userEmail === userEmail);
+
+      if (loggedInUser) {
+        setUserCredits(loggedInUser.credits || 0); // Set user's credits
+      }
+    } catch (error) {
+      console.error("Error fetching user credits:", error);
+    }
+  };
 
   // Handle credit input change
   const handleCreditChange = (email, value) => {
@@ -45,46 +57,72 @@ const UserList = () => {
     }));
   };
 
-  // Handle credit update
-  const updateCredits = async (email, existingCredits) => {
-    const additionalCredits = parseInt(creditUpdates[email], 10) || 0; // Get input value and convert to number
-    const updatedCredits = existingCredits + additionalCredits; // Add new credits
+  // Handle Add Credits (Reduce from logged-in user, add to selected user)
+  const handleAddCredits = async (email, existingCredits) => {
+    const transferCredits = parseInt(creditUpdates[email], 10) || 0;
+    
+    if (transferCredits > userCredits) {
+      alert("Not enough credits to transfer.");
+      return;
+    }
 
+    const updatedLoggedInCredits = userCredits - transferCredits;
+    const updatedUserCredits = existingCredits + transferCredits;
+
+    await updateCredits(email, updatedUserCredits, updatedLoggedInCredits);
+  };
+
+  // Handle Minus Credits (Increase logged-in user, reduce from selected user)
+  const handleMinusCredits = async (email, existingCredits) => {
+    const transferCredits = parseInt(creditUpdates[email], 10) || 0;
+
+    if (transferCredits > existingCredits) {
+      alert("User does not have enough credits to transfer.");
+      return;
+    }
+
+    const updatedLoggedInCredits = userCredits + transferCredits;
+    const updatedUserCredits = existingCredits - transferCredits;
+
+    await updateCredits(email, updatedUserCredits, updatedLoggedInCredits);
+  };
+
+  // Update Credits in Database
+  const updateCredits = async (email, updatedUserCredits, updatedLoggedInCredits) => {
     try {
-      const response = await fetch(
-        "http://localhost:3000/users/update-credits",
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userEmail: email,
-            credits: updatedCredits, // Send updated total credits
-          }),
-        }
-      );
+      // Update selected user credits
+      const responseUser = await fetch("http://localhost:3000/users/update-credits", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userEmail: email, credits: updatedUserCredits }),
+      });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to update credits.");
+      if (!responseUser.ok) {
+        throw new Error("Failed to update user credits.");
       }
 
-      alert(`Credits updated successfully. New total: ${updatedCredits}`);
+      // Update logged-in user credits
+      const responseLoggedInUser = await fetch("http://localhost:3000/users/update-credits", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userEmail, credits: updatedLoggedInCredits }),
+      });
 
-      // Update local state to reflect the new credits in UI
+      if (!responseLoggedInUser.ok) {
+        throw new Error("Failed to update logged-in user credits.");
+      }
+
+      alert(`Transaction successful! Your new credits: ${updatedLoggedInCredits}`);
+
+      // Update UI
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
-          user.userEmail === email ? { ...user, credits: updatedCredits } : user
+          user.userEmail === email ? { ...user, credits: updatedUserCredits } : user
         )
       );
 
-      // Clear input field after update
-      setCreditUpdates((prev) => ({
-        ...prev,
-        [email]: "",
-      }));
+      setUserCredits(updatedLoggedInCredits);
+      setCreditUpdates((prev) => ({ ...prev, [email]: "" }));
     } catch (error) {
       console.error("Error updating credits:", error);
       alert(error.message);
@@ -97,6 +135,9 @@ const UserList = () => {
       <div className="main-content">
         <h1 className="user-list-header">User List</h1>
 
+        {/* Display logged-in user's credits */}
+        <h3>My Credits: {userCredits}</h3>
+
         {loading ? (
           <p>Loading users...</p>
         ) : error ? (
@@ -107,11 +148,11 @@ const UserList = () => {
           <table className="user-table">
             <thead>
               <tr>
-                <th>#</th>
+                <th>Sr No</th>
                 <th>Email</th>
-                {/* <th>Password</th> */}
                 <th>Credits</th>
-                <th>Update Credits</th>
+                <th>Transfer Credits</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -119,24 +160,21 @@ const UserList = () => {
                 <tr key={user.userEmail}>
                   <td>{index + 1}</td>
                   <td>{user.userEmail}</td>
-                  {/* <td>{user.userPassword}</td> */}
-                  {/* Not secure to display password */}
                   <td>{user.credits}</td>
                   <td>
                     <input
                       type="number"
                       placeholder="Enter credits"
                       value={creditUpdates[user.userEmail] || ""}
-                      onChange={(e) =>
-                        handleCreditChange(user.userEmail, e.target.value)
-                      }
+                      onChange={(e) => handleCreditChange(user.userEmail, e.target.value)}
                     />
-                    <button
-                      onClick={() =>
-                        updateCredits(user.userEmail, user.credits)
-                      }
-                    >
-                      Update
+                  </td>
+                  <td>
+                    <button className="add-btn" onClick={() => handleAddCredits(user.userEmail, user.credits)}>
+                      +
+                    </button> 
+                    <button className="minus-btn" onClick={() => handleMinusCredits(user.userEmail, user.credits)}>
+                      -
                     </button>
                   </td>
                 </tr>

@@ -39,6 +39,7 @@ const Sidebar = () => {
   ];
 
   const superAdminItems = [
+    { name: "All Admin", path: "/all-admin" },
     { name: "All User", path: "/all-user" },
     { name: "All User Statistic", path: "/all-user-statistics" },
     // { name: "API Documentation" },

@@ -19,6 +19,7 @@ import Statistic from "./components/Statistic";
 import UserList from "./components/userList";
 import UserStatistics from "./components/UserStatistics";
 import AllUser from "./components/AllUser";
+import AllAdmin from "./components/AllAdmin";
 import AllStatistics from "./components/AllStatistics";
 
 import "./App.css";
@@ -35,6 +36,7 @@ function App() {
     "/user-list",
     "/UserStatistics",
     "/all-user",
+    "/all-admin",
     "/all-user-statistics",
   ]; // Paths without Header/Footer
 
@@ -51,6 +53,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/add-user" element={<AddUser />} />
+        <Route path="/all-admin" element={<AllAdmin />} />
         <Route path="/user-list" element={<UserList />} />
         <Route path="/all-user" element={<AllUser />} />
         <Route path="/all-user-statistics" element={<AllStatistics />} />

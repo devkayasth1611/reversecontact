@@ -10,7 +10,7 @@ const AllUser = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('http://localhost:3000/users/getAllUser');
+        const response = await fetch('http://localhost:3000/users/user');
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -32,31 +32,31 @@ const AllUser = () => {
     fetchUsers();
   }, []);
 
-  // Function to map roleId to role names
-  const getRoleName = (roleId) => {
-    switch (roleId) {
-      case 1:
-        return 'Admin';
-      case 2:
-        return 'User';
-      case 3:
-        return 'Super Admin';
-      default:
-        return 'Unknown';
-    }
-  };
+  // // Function to map roleId to role names
+  // const getRoleName = (roleId) => {
+  //   switch (roleId) {
+  //     case 1:
+  //       return 'Admin';
+  //     case 2:
+  //       return 'User';
+  //     case 3:
+  //       return 'Super Admin';
+  //     default:
+  //       return 'Unknown';
+  //   }
+  // };
 
   // Filter users based on search term
   const filteredUsers = users.filter((user) => {
-    const roleName = getRoleName(user.roleId).toLowerCase();
-    const roleId = String(user.roleId);
+    // const roleName = getRoleName(user.roleId).toLowerCase();
+    // const roleId = String(user.roleId);
     const email = user.userEmail?.toLowerCase() || '';
     const phone = user.phoneNumber?.toLowerCase() || '';
     const search = searchTerm.toLowerCase();
 
     return (
-      roleName.includes(search) ||
-      roleId.includes(search) ||
+      // roleName.includes(search) ||
+      // roleId.includes(search) ||
       email.includes(search) ||
       phone.includes(search)
     );
@@ -71,7 +71,7 @@ const AllUser = () => {
         {/* Search Input Field */}
         <input
           type="text"
-          placeholder="Search by Role Name, Email, or Phone..."
+          placeholder="Search by Email or Phone..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
@@ -85,7 +85,7 @@ const AllUser = () => {
                 <th>User Password</th>
                 <th>Company Name</th>
                 <th>Phone Number</th>
-                <th>Role</th>
+                {/* <th>Role</th> */}
                 <th>Created By</th>
                 <th>Credits</th>
               </tr>
@@ -98,7 +98,7 @@ const AllUser = () => {
                     <td>{user.userPassword || "N/A"}</td>
                     <td>{user.companyName || "N/A"}</td>
                     <td>{user.phoneNumber || "N/A"}</td>
-                    <td>{getRoleName(user.roleId)}</td>
+                    {/* <td>{getRoleName(user.roleId)}</td> */}
                     <td>{user.createdBy || "N/A"}</td>
                     <td>{user.credits || "N/A"}</td>
                   </tr>

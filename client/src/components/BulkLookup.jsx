@@ -183,8 +183,8 @@ const BulkLookup = () => {
     const duplicateCount = statistics.duplicateCount + duplicateLinks.length;
     const netNewCount = statistics.netNewCount + newLinks.length;
   
-    const creditUsed = statistics.creditUsed + 25;
-    const remainingCredits = Math.max(0, statistics.remainingCredits - 25);
+    const creditUsed = linkUploadCount * 5;
+    const remainingCredits = Math.max(0, statistics.remainingCredits - (linkUploadCount * 5));
   
     const updatedStatistics = {
       task: "Bulk Lookup",

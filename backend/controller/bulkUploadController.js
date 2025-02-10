@@ -4,6 +4,7 @@ const BulkUpload = require("../model/bulkUploadModel");
 exports.addBulkUploadEntry = async (req, res) => {
   try {
     const {
+      task,
       filename,
       duplicateCount = 0,
       netNewCount = 0,

@@ -81,18 +81,18 @@ const BulkLookup = () => {
       alert("Please upload a file first.");
       return;
     }
-
+  
     if (statistics.remainingCredits <= 0) {
       alert("You have no remaining credits. Please contact support.");
       return;
     }
-
+  
     try {
       const reader = new FileReader();
       reader.onload = async (e) => {
         const fileData = e.target.result;
         let links = [];
-
+  
         if (file.name.endsWith(".csv")) {
           const parsedData = Papa.parse(fileData, { header: false }).data;
           links = parsedData.flat();
@@ -102,27 +102,29 @@ const BulkLookup = () => {
           const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
           links = jsonData.flat();
         }
-
+  
         const linkedinRegex = /([a-z]{2,3}\.)?linkedin\.com\/.+$/;
         const validLinks = links.filter((link) => linkedinRegex.test(link));
-
+  
         if (validLinks.length === 0) {
           alert("No valid LinkedIn links found in the file.");
           return;
         }
-
+  
+        const linkUploadCount = validLinks.length; // Count the number of valid links
+  
         setIsLoading(true);
-
+  
         try {
           const apiUrl = `http://localhost:3000/mobileEnrichments/mobileEnrichment?linkedin_url=${validLinks.join(
             ","
           )}`;
           const response = await fetch(apiUrl);
-
+  
           if (!response.ok) throw new Error("Failed to fetch bulk data");
-
+  
           const data = await response.json();
-
+  
           if (data.data && data.data.length > 0) {
             const bulkData = validLinks.map((link, index) => {
               const result = data.data[index];
@@ -136,13 +138,13 @@ const BulkLookup = () => {
                 mobile_2: result?.mobile_2 || "Not Available",
               };
             });
-
+  
             setBulkResults(bulkData);
-            await saveStatistics(file.name, validLinks);
-
+            await saveStatistics(file.name, validLinks, linkUploadCount); // Pass the count here
+  
             const newCredits = statistics.remainingCredits - 25; // Deduct 25 credits for file upload
             await updateUserCredits(newCredits);
-
+  
             alert("Bulk data fetched successfully and statistics saved!");
           } else {
             alert("No data found for the provided LinkedIn URLs.");
@@ -154,7 +156,7 @@ const BulkLookup = () => {
           setIsLoading(false);
         }
       };
-
+  
       if (file.name.endsWith(".csv")) {
         reader.readAsText(file);
       } else if (file.name.endsWith(".xlsx")) {
@@ -164,27 +166,28 @@ const BulkLookup = () => {
       console.error("Error processing file:", error);
       alert("Error processing file. Please try again later.");
     }
-  };
+  };  
 
-  const saveStatistics = async (filename, validLinks) => {
+  const saveStatistics = async (filename, validLinks, linkUploadCount) => {
     const userStats =
       JSON.parse(sessionStorage.getItem("statisticsData")) || {};
     const userPreviousUploads = userStats[userEmail]?.uploadedLinks || [];
-
+  
     const newLinks = validLinks.filter(
       (link) => !userPreviousUploads.includes(link)
     );
     const duplicateLinks = validLinks.filter((link) =>
       userPreviousUploads.includes(link)
     );
-
+  
     const duplicateCount = statistics.duplicateCount + duplicateLinks.length;
     const netNewCount = statistics.netNewCount + newLinks.length;
-
+  
     const creditUsed = statistics.creditUsed + 25;
     const remainingCredits = Math.max(0, statistics.remainingCredits - 25);
-
+  
     const updatedStatistics = {
+      task: "Bulk Lookup",
       email: userEmail,
       filename,
       duplicateCount,
@@ -193,20 +196,21 @@ const BulkLookup = () => {
       creditUsed,
       remainingCredits,
       uploadedLinks: [...userPreviousUploads, ...newLinks],
+      linkUpload: linkUploadCount, // Store the count here
     };
-
+  
     userStats[userEmail] = updatedStatistics;
     sessionStorage.setItem("statisticsData", JSON.stringify(userStats));
-
+  
     setStatistics(updatedStatistics);
-
+  
     try {
       const response = await fetch("http://localhost:3000/bulkUpload/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedStatistics),
       });
-
+  
       if (!response.ok)
         throw new Error(`Error saving statistics: ${response.statusText}`);
       alert("Statistics saved successfully!");
@@ -214,7 +218,7 @@ const BulkLookup = () => {
       console.error("Error saving statistics:", error);
       alert(`Error saving statistics: ${error.message}`);
     }
-  };
+  };  
 
   const handleDownloadExcel = () => {
     if (bulkResults.length === 0) {

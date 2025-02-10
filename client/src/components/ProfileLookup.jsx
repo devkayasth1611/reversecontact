@@ -107,8 +107,10 @@ const ProfileLookup = () => {
 
         // Update statistics
         const updatedStatistics = {
+          task: "Profile Lookup",
           email: userEmail,
           filename: linkedinLink,
+          linkUpload:1,
           duplicateCount,
           netNewCount,
           newEnrichedCount,

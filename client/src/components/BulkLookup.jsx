@@ -111,7 +111,13 @@ const BulkLookup = () => {
           return;
         }
   
-        const linkUploadCount = validLinks.length; // Count the number of valid links
+        const linkUploadCount = validLinks.length; // Number of valid LinkedIn links
+        const creditDeduction = linkUploadCount * 5; // Deduct credits (5 per link)
+  
+        if (statistics.remainingCredits < creditDeduction) {
+          alert("Insufficient credits to process this file.");
+          return;
+        }
   
         setIsLoading(true);
   
@@ -140,9 +146,9 @@ const BulkLookup = () => {
             });
   
             setBulkResults(bulkData);
-            await saveStatistics(file.name, validLinks, linkUploadCount); // Pass the count here
+            await saveStatistics(file.name, validLinks, linkUploadCount);
   
-            const newCredits = statistics.remainingCredits - 25; // Deduct 25 credits for file upload
+            const newCredits = Math.max(0, statistics.remainingCredits - creditDeduction); // Deduct credits
             await updateUserCredits(newCredits);
   
             alert("Bulk data fetched successfully and statistics saved!");
@@ -166,7 +172,8 @@ const BulkLookup = () => {
       console.error("Error processing file:", error);
       alert("Error processing file. Please try again later.");
     }
-  };  
+  };
+   
 
   const saveStatistics = async (filename, validLinks, linkUploadCount) => {
     const userStats =
@@ -184,7 +191,7 @@ const BulkLookup = () => {
     const netNewCount = statistics.netNewCount + newLinks.length;
   
     const creditUsed = linkUploadCount * 5;
-    const remainingCredits = Math.max(0, statistics.remainingCredits - (linkUploadCount * 5));
+    const remainingCredits = Math.max(0, statistics.remainingCredits - creditUsed);
   
     const updatedStatistics = {
       task: "Bulk Lookup",

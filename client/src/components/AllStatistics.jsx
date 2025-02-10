@@ -42,9 +42,12 @@ const AllStatistics = () => {
           <table>
             <thead>
               <tr>
+                <th>Sr No.</th>
+                <th>Task</th>
                 <th>Email</th>
                 <th>Date</th>
-                <th>Filename</th>
+                <th>Filename / LinkedIn Link</th>
+                <th>Link Count</th>
                 <th>Duplicate Count</th>
                 <th>Net New Count</th>
                 <th>New Enriched Count</th>
@@ -56,9 +59,12 @@ const AllStatistics = () => {
               {statistics.length > 0 ? (
                 statistics.map((stat, index) => (
                   <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{stat.task}</td>
                     <td>{stat.email || "N/A"}</td>
                     <td>{new Date(stat.date).toLocaleDateString()}</td>
                     <td>{stat.filename || "N/A"}</td>
+                    <td>{stat.linkUpload}</td>
                     <td>{stat.duplicateCount || "0"}</td>
                     <td>{stat.netNewCount || "0"}</td>
                     <td>{stat.newEnrichedCount || "0"}</td>

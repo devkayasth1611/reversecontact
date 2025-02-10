@@ -8,7 +8,8 @@ const Statistics = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const loggedInUserEmail = JSON.parse(sessionStorage.getItem("user"))?.email || "Guest";
+  const loggedInUserEmail =
+    JSON.parse(sessionStorage.getItem("user"))?.email || "Guest";
 
   useEffect(() => {
     const fetchUserList = async () => {
@@ -17,8 +18,10 @@ const Statistics = () => {
         if (!response.ok) throw new Error("Failed to fetch users");
 
         const { data } = await response.json();
-        const filteredUsers = data.filter(user => user.createdBy === loggedInUserEmail);
-        const emails = filteredUsers.map(user => user.userEmail); // Extract emails
+        const filteredUsers = data.filter(
+          (user) => user.createdBy === loggedInUserEmail
+        );
+        const emails = filteredUsers.map((user) => user.userEmail); // Extract emails
 
         setUserEmails(emails);
       } catch (err) {
@@ -34,11 +37,15 @@ const Statistics = () => {
 
     const fetchStatistics = async () => {
       try {
-        const response = await fetch("http://localhost:3000/bulkUpload/allstatistics");
+        const response = await fetch(
+          "http://localhost:3000/bulkUpload/allstatistics"
+        );
         if (!response.ok) throw new Error("Failed to fetch statistics");
 
         const data = await response.json();
-        const filteredStatistics = data.filter(stat => userEmails.includes(stat.email));
+        const filteredStatistics = data.filter((stat) =>
+          userEmails.includes(stat.email)
+        );
 
         setStatistics(filteredStatistics);
       } catch (err) {
@@ -61,32 +68,40 @@ const Statistics = () => {
         ) : error ? (
           <p style={{ color: "red" }}>{error}</p>
         ) : statistics.length > 0 ? (
-          <table className="statistics-table">
-            <thead>
-              <tr>
-                <th>Email</th>
-                <th>File Name</th>
-                <th>Duplicate Count</th>
-                <th>Net New Count</th>
-                <th>New Enriched Count</th>
-                <th>Credits Used</th>
-                <th>Remaining Credits</th>
-              </tr>
-            </thead>
-            <tbody>
-              {statistics.map((stat, index) => (
-                <tr key={index}>
-                  <td>{stat.email}</td>
-                  <td>{stat.filename}</td>
-                  <td>{stat.duplicateCount}</td>
-                  <td>{stat.netNewCount}</td>
-                  <td>{stat.newEnrichedCount}</td>
-                  <td>{stat.creditUsed}</td>
-                  <td>{stat.remainingCredits}</td>
+          <div className="table-container">
+            <table className="statistics-table">
+              <thead>
+                <tr>
+                  <th>Sr No.</th>
+                  <th>Task</th>
+                  <th>Email</th>
+                  <th>File Name / LinkedIn Link</th>
+                  <th>Link Upload</th>
+                  <th>Duplicate Count</th>
+                  <th>Net New Count</th>
+                  <th>New Enriched Count</th>
+                  <th>Credits Used</th>
+                  <th>Remaining Credits</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {statistics.map((stat, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{stat.task}</td>
+                    <td>{stat.email}</td>
+                    <td>{stat.filename}</td>
+                    <td>{stat.linkUpload}</td>
+                    <td>{stat.duplicateCount}</td>
+                    <td>{stat.netNewCount}</td>
+                    <td>{stat.newEnrichedCount}</td>
+                    <td>{stat.creditUsed}</td>
+                    <td>{stat.remainingCredits}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
           <p>No statistics available.</p>
         )}

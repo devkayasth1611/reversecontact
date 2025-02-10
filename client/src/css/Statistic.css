@@ -1,139 +1,94 @@
+/* Dashboard Layout */
 .dashboard {
   display: flex;
   flex-wrap: wrap;
 }
 
-.statistics-container {
-    padding: 20px;
-    font-family: Arial, sans-serif;
-  }
-  
-  .credits-display {
-    margin-bottom: 20px;
-    text-align: right;
-    font-size: 18px;
-    font-weight: bold;
-  }
-  
+.main-content {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.profile-lookup {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Table Container */
+.statistics-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 16px;
+  text-align: left;
+  min-width: 800px; /* Prevents table from breaking on small screens */
+}
+
+/* Table Headers and Cells */
+.statistics-table th,
+.statistics-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+.statistics-table th {
+  background-color: #f4f4f4;
+  color: #333;
+  font-weight: bold;
+}
+
+/* Alternating Row Colors */
+.statistics-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.statistics-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Sticky Table Header */
+.statistics-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* Responsive Table - Wrapping Container */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
   .statistics-table {
-    width: 100%;
-    border-collapse: collapse;
+    font-size: 14px;
+    min-width: 100%;
   }
-  
+}
+
+@media (max-width: 768px) {
+  .statistics-table {
+    font-size: 12px;
+  }
+
   .statistics-table th,
   .statistics-table td {
-    border: 1px solid #ddd;
     padding: 8px;
-    text-align: center;
   }
-  
-  .statistics-table th {
-    background-color: #f4f4f4;
-    font-weight: bold;
+}
+
+@media (max-width: 480px) {
+  .statistics-table {
+    font-size: 11px;
   }
-  
-  .statistics-table tr:nth-child(even) {
-    background-color: #f9f9f9;
+
+  .statistics-table th,
+  .statistics-table td {
+    padding: 6px;
   }
-  
-  .statistics-table tr:hover {
-    background-color: #f1f1f1;
-  }
-  
-  .download-button {
-    padding: 5px 10px;
-    color: white;
-    background-color: #007bff;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-  }
-  
-  .download-button:hover {
-    background-color: #0056b3;
-  }
-  
-  /* Table Styling */
-  .statistics-page table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-    font-size: 16px;
-    text-align: left;
-  }
-  
-  .statistics-page th, 
-  .statistics-page td {
-    padding: 8px 10px;
-    border: 1px solid #ddd;
-  }
-  
-  .statistics-page th {
-    background-color: #f4f4f4;
-    color: #333;
-    font-weight: bold;
-  }
-  
-  .statistics-page tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-  
-  .statistics-page tr:hover {
-    background-color: #f1f1f1;
-  }
-  
-  .statistics-page td {
-    text-align: center;
-  }
-  
-  .statistics-page th:first-child,
-  .statistics-page td:first-child {
-    width: 5%;
-  }
-  
-  .statistics-page th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-  }
-  
-  /* Table Container for Scroll */
-  .statistics-page {
-    overflow-x: auto;
-    margin: 0 auto;
-    max-width: 100%;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  
-  
-  /* Fade-in animation */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: scale(0.9);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-  
-  /* Responsiveness */
-  @media (max-width: 768px) {
-    .sidebar {
-      width: 100%;
-      max-height: none;
-    }
-  
-    .main-content {
-      width: 100%;
-    }
-  
-    .lookup-options {
-      flex-direction: column;
-      /* align-items: center; */
-    }
-  }
-  
+}

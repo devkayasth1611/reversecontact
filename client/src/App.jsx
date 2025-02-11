@@ -21,8 +21,11 @@ import UserStatistics from "./components/UserStatistics";
 import AllUser from "./components/AllUser";
 import AllAdmin from "./components/AllAdmin";
 import AllStatistics from "./components/AllStatistics";
+import AdminCreditReport from "./components/AdminCreditReport";
+import UserCreditReport from "./components/UserCreditReport";
 
 import "./App.css";
+
 
 function App() {
   const location = useLocation();
@@ -38,6 +41,8 @@ function App() {
     "/all-user",
     "/all-admin",
     "/all-user-statistics",
+    "/admin-credit-report",
+    "/user-credit-report",
   ]; // Paths without Header/Footer
 
   const isExcluded = excludePaths.includes(location.pathname); // Check if current path matches
@@ -55,6 +60,8 @@ function App() {
         <Route path="/add-user" element={<AddUser />} />
         <Route path="/all-admin" element={<AllAdmin />} />
         <Route path="/user-list" element={<UserList />} />
+        <Route path="/admin-credit-report" element={<AdminCreditReport />} />
+        <Route path="/user-credit-report" element={<UserCreditReport />} />
         <Route path="/all-user" element={<AllUser />} />
         <Route path="/all-user-statistics" element={<AllStatistics />} />
         <Route path="/UserStatistics" element={<UserStatistics />} />

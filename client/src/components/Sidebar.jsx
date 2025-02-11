@@ -26,6 +26,7 @@ const Sidebar = () => {
     { name: "Add User", path: "/add-user" },
     { name: "User List", path: "/user-list" },
     { name: "Statistic", path: "/statistic" },
+    { name: "Credit Report", path: "/user-credit-report"},
     { name: "Sign out" },
   ];
 
@@ -42,6 +43,7 @@ const Sidebar = () => {
     { name: "All Admin", path: "/all-admin" },
     { name: "All User", path: "/all-user" },
     { name: "All User Statistic", path: "/all-user-statistics" },
+    { name: "Credit Report", path: "/admin-credit-report"},
     // { name: "API Documentation" },
     // { name: "Plans & Pricing" },
     { name: "Sign out" },

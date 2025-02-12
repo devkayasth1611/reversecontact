@@ -58,69 +58,83 @@ const UserList = () => {
   };
 
   // Handle Add Credits (Reduce from logged-in user, add to selected user)
-  const handleAddCredits = async (email, existingCredits) => {
-    const transferCredits = parseInt(creditUpdates[email], 10) || 0;
-    
-    if (transferCredits > userCredits) {
-      alert("Not enough credits to transfer.");
-      return;
-    }
+const handleAddCredits = async (email, existingCredits) => {
+  const transferCredits = parseInt(creditUpdates[email], 10) || 0;
 
-    const updatedLoggedInCredits = userCredits - transferCredits;
-    const updatedUserCredits = existingCredits + transferCredits;
+  if (transferCredits > userCredits) {
+    alert("Not enough credits to transfer.");
+    return;
+  }
 
-    await updateCredits(email, updatedUserCredits, updatedLoggedInCredits);
-  };
+  const updatedLoggedInCredits = userCredits - transferCredits;
+  const updatedUserCredits = existingCredits + transferCredits;
 
-  // Handle Minus Credits (Increase logged-in user, reduce from selected user)
-  const handleMinusCredits = async (email, existingCredits) => {
-    const transferCredits = parseInt(creditUpdates[email], 10) || 0;
+  await updateCredits(email, updatedUserCredits, updatedLoggedInCredits, true); // true for adding credits
+};
 
-    if (transferCredits > existingCredits) {
-      alert("User does not have enough credits to transfer.");
-      return;
-    }
+// Handle Minus Credits (Increase logged-in user, reduce from selected user)
+const handleMinusCredits = async (email, existingCredits) => {
+  const transferCredits = parseInt(creditUpdates[email], 10) || 0;
 
-    const updatedLoggedInCredits = userCredits + transferCredits;
-    const updatedUserCredits = existingCredits - transferCredits;
+  if (transferCredits > existingCredits) {
+    alert("User does not have enough credits to transfer.");
+    return;
+  }
 
-    await updateCredits(email, updatedUserCredits, updatedLoggedInCredits);
-  };
+  const updatedLoggedInCredits = userCredits + transferCredits;
+  const updatedUserCredits = existingCredits - transferCredits;
+
+  await updateCredits(email, updatedUserCredits, updatedLoggedInCredits, false); // false for deducting credits
+};
+
 
   // Update Credits in Database
-  const updateCredits = async (email, updatedUserCredits, updatedLoggedInCredits) => {
+  const updateCredits = async (email, updatedUserCredits, updatedLoggedInCredits, isAdding) => {
+    const transferCredits = parseInt(creditUpdates[email], 10) || 0;
+  
+    if (transferCredits === 0) {
+      alert("Enter a valid amount to transfer.");
+      return;
+    }
+  
+    // Determine transaction type correctly
+    const senderTransactionType = isAdding ? "debit" : "credit"; // Logged-in user is sending (reduce for add, increase for minus)
+    const recipientTransactionType = isAdding ? "credit" : "debit"; // Recipient is receiving (increase for add, reduce for minus)
+  
     try {
-      // Update selected user credits
-      const responseUser = await fetch("http://localhost:3000/users/update-credits", {
+      // Update recipient user's credits
+      await fetch("http://localhost:3000/transactions/update-credits", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userEmail: email, credits: updatedUserCredits }),
+        body: JSON.stringify({
+          userEmail: email, // Recipient user
+          updatedCredits: updatedUserCredits,
+          transactionType: recipientTransactionType,
+          amount: Math.abs(transferCredits),
+        }),
       });
-
-      if (!responseUser.ok) {
-        throw new Error("Failed to update user credits.");
-      }
-
-      // Update logged-in user credits
-      const responseLoggedInUser = await fetch("http://localhost:3000/users/update-credits", {
+  
+      // Update logged-in user's credits
+      await fetch("http://localhost:3000/transactions/update-credits", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userEmail, credits: updatedLoggedInCredits }),
+        body: JSON.stringify({
+          userEmail, // Logged-in user
+          updatedCredits: updatedLoggedInCredits,
+          transactionType: senderTransactionType,
+          amount: Math.abs(transferCredits),
+        }),
       });
-
-      if (!responseLoggedInUser.ok) {
-        throw new Error("Failed to update logged-in user credits.");
-      }
-
+  
       alert(`Transaction successful! Your new credits: ${updatedLoggedInCredits}`);
-
+  
       // Update UI
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.userEmail === email ? { ...user, credits: updatedUserCredits } : user
         )
       );
-
+  
       setUserCredits(updatedLoggedInCredits);
       setCreditUpdates((prev) => ({ ...prev, [email]: "" }));
     } catch (error) {
@@ -128,7 +142,8 @@ const UserList = () => {
       alert(error.message);
     }
   };
-
+  
+  
   return (
     <div className="dashboard">
       <Sidebar userEmail={userEmail} />

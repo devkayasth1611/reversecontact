@@ -44,3 +44,6 @@ app.use('/users', userRoutes)
 
 const bulkUploadRoutes = require('./routes/bulkUploadRoutes')
 app.use('/bulkUpload', bulkUploadRoutes)
+
+const creditTransactionRoutes = require("./routes/creditTransactionRoutes");  // Import new routes
+app.use("/transactions", creditTransactionRoutes);  

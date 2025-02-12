@@ -34,6 +34,7 @@ const Sidebar = () => {
     { name: "Profile Lookup", path: "/profile-lookup" },
     { name: "Bulk Lookup", path: "/bulk-lookup" },
     { name: "User Statistic", path: "/UserStatistics" },
+    { name: "Credit Report", path: "/user-credit-report"},
     // { name: "API Documentation" },
     // { name: "Plans & Pricing" },
     { name: "Sign out" },

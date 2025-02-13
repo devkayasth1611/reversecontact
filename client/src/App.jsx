@@ -16,7 +16,7 @@ import ProfileLookup from "./components/ProfileLookup";
 import BulkLookup from "./components/BulkLookup";
 import AddUser from "./components/AddUser";
 import Statistic from "./components/Statistic";
-import UserList from "./components/userList";
+import UserList from "./components/UserList";
 import UserStatistics from "./components/UserStatistics";
 import AllUser from "./components/AllUser";
 import AllAdmin from "./components/AllAdmin";

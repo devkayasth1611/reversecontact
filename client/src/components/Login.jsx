@@ -97,19 +97,19 @@ function Login() {
           {isSubmitting ? "Logging in..." : "Log in"}
         </button>
         {errorMessage && <p className="error-message">{errorMessage}</p>}
-        <div className="login-or-divider">
+        {/* <div className="login-or-divider">
           <span className="login-divider-line"></span>
           <span className="login-or-text">OR</span>
           <span className="login-divider-line"></span>
-        </div>
-        <button type="button" className="google-login-button">
+        </div> */}
+        {/* <button type="button" className="google-login-button">
           <img
             src="/google.png"
             alt="Google"
             className="google-icon"
           />
           <p>Sign in with Google</p>
-        </button>
+        </button> */}
       </form>
       <p className="signup-text">
         Need an account? <a href="/signup">Sign up here</a>

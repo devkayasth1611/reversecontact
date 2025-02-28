@@ -100,6 +100,7 @@ const Sidebar = () => {
           ))}
         </ul>
       </nav>
+      {roleId === "1" && (
       <div className="start-plan">
         <h3>Start Your Plan</h3>
         <p>
@@ -107,6 +108,7 @@ const Sidebar = () => {
         </p>
         <button>Upgrade</button>
       </div>
+    )}
     </aside>
   );
 };

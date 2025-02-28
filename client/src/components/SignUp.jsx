@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../css/SignUp.css";
 
@@ -7,25 +7,87 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [captcha, setCaptcha] = useState("");
+  const [captchaText, setCaptchaText] = useState("");
   const [captchaInput, setCaptchaInput] = useState("");
-  const [error, setError] = useState(""); // State for error message
-  const [captchaError, setCaptchaError] = useState(""); // State for captcha error
+  const [error, setError] = useState("");
+  const [captchaError, setCaptchaError] = useState("");
+  const canvasRef = useRef(null);
   const navigate = useNavigate();
 
-  // Generate a random CAPTCHA code
-  const generateCaptcha = () => {
+  // Generate a random CAPTCHA text
+  const generateCaptchaText = () => {
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let result = "";
-    for (let i = 0; i < 6; i++) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    for (let i = 0; i < 5; i++) {
+      result += characters.charAt(
+        Math.floor(Math.random() * characters.length)
+      );
     }
-    setCaptcha(result);
+    return result;
   };
 
-  // Initialize CAPTCHA on component mount
-  React.useEffect(() => {
-    generateCaptcha();
+  // Draw CAPTCHA on canvas
+  const drawCaptcha = () => {
+    const text = generateCaptchaText();
+    setCaptchaText(text);
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+
+    // Set canvas dimensions
+    canvas.width = 180;
+    canvas.height = 50;
+
+    // Clear previous CAPTCHA
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Background styling
+    ctx.fillStyle = "#f3f3f3";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Random font styles
+    ctx.font = "30px Arial";
+    ctx.fillStyle = "#000";
+    ctx.textBaseline = "middle";
+
+    // Slight rotation for each letter
+    let x = 20;
+    for (let i = 0; i < text.length; i++) {
+      ctx.save();
+      ctx.translate(x, 30);
+      ctx.rotate(((Math.random() * 30 - 15) * Math.PI) / 180);
+      ctx.fillText(text[i], 0, 0);
+      ctx.restore();
+      x += 25;
+    }
+
+    // Add noise dots
+    for (let i = 0; i < 30; i++) {
+      ctx.fillStyle = `rgba(0,0,0,${Math.random()})`;
+      ctx.beginPath();
+      ctx.arc(
+        Math.random() * canvas.width,
+        Math.random() * canvas.height,
+        1,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+    }
+
+    // Add random lines
+    for (let i = 0; i < 4; i++) {
+      ctx.strokeStyle = `rgba(0,0,0,${Math.random()})`;
+      ctx.beginPath();
+      ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+      ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+      ctx.stroke();
+    }
+  };
+
+  // Generate CAPTCHA on component mount
+  useEffect(() => {
+    drawCaptcha();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -38,11 +100,12 @@ const SignUp = () => {
     }
 
     // CAPTCHA validation
-    if (captchaInput !== captcha) {
+    if (captchaInput !== captchaText) {
       setCaptchaError("CAPTCHA does not match.");
       return;
     }
 
+    // User data to be sent to backend
     const userData = {
       userEmail: email,
       userPassword: password,
@@ -61,10 +124,7 @@ const SignUp = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Store user email temporarily in session storage
         sessionStorage.setItem("userEmail", email);
-
-        // Reset form and navigate to login
         setEmail("");
         setPassword("");
         setCompanyName("");
@@ -72,23 +132,15 @@ const SignUp = () => {
         setCaptchaInput("");
         setError("");
         setCaptchaError("");
-        generateCaptcha(); // Refresh CAPTCHA
+        drawCaptcha(); // Refresh CAPTCHA
         navigate("/login");
       } else if (response.status === 409) {
-        // Handle duplicate email error
         setError("User already exists.");
       } else {
         setError(data.message || "An error occurred during signup.");
       }
     } catch (err) {
       setError("Error during signup. Please try again.");
-    }
-  };
-
-  const handlePhoneNumberChange = (e) => {
-    const input = e.target.value;
-    if (/^\d*$/.test(input) && input.length <= 10) {
-      setPhoneNumber(input);
     }
   };
 
@@ -131,23 +183,30 @@ const SignUp = () => {
             placeholder="Enter your phone number"
             className="input-field"
             value={phoneNumber}
-            onChange={handlePhoneNumberChange}
+            onChange={(e) => setPhoneNumber(e.target.value)}
           />
           <div className="captcha-section">
-            <p className="captcha-text">CAPTCHA: {captcha}</p>
-            <input
-              type="text"
-              placeholder="Enter CAPTCHA"
-              className="input-field"
-              value={captchaInput}
-              onChange={(e) => setCaptchaInput(e.target.value)}
-            />
+            <canvas ref={canvasRef} className="captcha-canvas"></canvas>
+            <button
+              type="button"
+              onClick={drawCaptcha}
+              className="refresh-captcha"
+            >
+              🔄
+            </button>
           </div>
+          <input
+            type="text"
+            placeholder="Enter CAPTCHA"
+            className="input-field"
+            value={captchaInput}
+            onChange={(e) => setCaptchaInput(e.target.value)}
+          />
           <button type="submit" className="create-account-btn">
             Create account
           </button>
         </form>
-        <div className="or-divider">
+        {/* <div className="or-divider">
           <span className="divider-line"></span>
           <span className="or-text">OR</span>
           <span className="divider-line"></span>
@@ -155,7 +214,7 @@ const SignUp = () => {
         <button type="button" className="google-signup-button">
           <img src="/google.png" alt="Google" className="google-icon" />
           <p>Sign in with Google</p>
-        </button>
+        </button> */}
         <p className="terms">
           By signing up, you agree to our <a href="#">Terms of Service</a> and
           our <a href="#">Privacy Policy</a>.

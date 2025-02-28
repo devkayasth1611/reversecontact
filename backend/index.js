@@ -47,3 +47,6 @@ app.use('/bulkUpload', bulkUploadRoutes)
 
 const creditTransactionRoutes = require("./routes/creditTransactionRoutes");  // Import new routes
 app.use("/transactions", creditTransactionRoutes);  
+
+const excelRoutes = require('./routes/excelRoutes')
+app.use('/excel', excelRoutes);

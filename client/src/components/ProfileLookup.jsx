@@ -102,7 +102,7 @@ const ProfileLookup = () => {
         const duplicateCount = (userStats[userEmail]?.duplicateCount || 0) + (isDuplicate ? 1 : 0);
         const netNewCount = (userStats[userEmail]?.netNewCount || 0) + (isDuplicate ? 0 : 1);
         const newEnrichedCount = (userStats[userEmail]?.newEnrichedCount || 0) + 1;
-        const creditUsed = (userStats[userEmail]?.creditUsed || 0) + 5;
+        const creditUsed = 5;
         const remainingCredits = Math.max(0, lookupCount - 5);
 
         // Update statistics

@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
-import '../css/AllUser.css'; // Import the external CSS file
+import '../css/AllUser.css';
+import { EyeFilled, EyeInvisibleFilled } from "@ant-design/icons";
 
 const AllUser = () => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [visiblePasswords, setVisiblePasswords] = useState({});
+
   const loggedInUserEmail = JSON.parse(sessionStorage.getItem('user'))?.email || 'Guest';
 
   useEffect(() => {
@@ -32,34 +35,20 @@ const AllUser = () => {
     fetchUsers();
   }, []);
 
-  // // Function to map roleId to role names
-  // const getRoleName = (roleId) => {
-  //   switch (roleId) {
-  //     case 1:
-  //       return 'Admin';
-  //     case 2:
-  //       return 'User';
-  //     case 3:
-  //       return 'Super Admin';
-  //     default:
-  //       return 'Unknown';
-  //   }
-  // };
+  // Toggle password visibility
+  const togglePasswordVisibility = (userId) => {
+    setVisiblePasswords((prevState) => ({
+      ...prevState,
+      [userId]: !prevState[userId],
+    }));
+  };
 
-  // Filter users based on search term
   const filteredUsers = users.filter((user) => {
-    // const roleName = getRoleName(user.roleId).toLowerCase();
-    // const roleId = String(user.roleId);
     const email = user.userEmail?.toLowerCase() || '';
     const phone = user.phoneNumber?.toLowerCase() || '';
     const search = searchTerm.toLowerCase();
 
-    return (
-      // roleName.includes(search) ||
-      // roleId.includes(search) ||
-      email.includes(search) ||
-      phone.includes(search)
-    );
+    return email.includes(search) || phone.includes(search);
   });
 
   return (
@@ -85,20 +74,27 @@ const AllUser = () => {
                 <th>User Password</th>
                 <th>Company Name</th>
                 <th>Phone Number</th>
-                {/* <th>Role</th> */}
                 <th>Created By</th>
                 <th>Credits</th>
               </tr>
             </thead>
             <tbody>
               {filteredUsers.length > 0 ? (
-                filteredUsers.map((user, index) => (
-                  <tr key={index}>
+                filteredUsers.map((user) => (
+                  <tr key={user._id}>
                     <td>{user.userEmail || "N/A"}</td>
-                    <td>{user.userPassword || "N/A"}</td>
+                    <td className="password-cell">
+                      {visiblePasswords[user._id] ? user.userPassword : "••••••••"}
+                      <span
+                        className="password-toggle"
+                        onClick={() => togglePasswordVisibility(user._id)}
+                        style={{ cursor: "pointer", marginLeft: "10px" }}
+                      >
+                        {visiblePasswords[user._id] ? <EyeInvisibleFilled className="hide-icon" /> : <EyeFilled className="show-icon" />}
+                      </span>
+                    </td>
                     <td>{user.companyName || "N/A"}</td>
                     <td>{user.phoneNumber || "N/A"}</td>
-                    {/* <td>{getRoleName(user.roleId)}</td> */}
                     <td>{user.createdBy || "N/A"}</td>
                     <td>{user.credits || "N/A"}</td>
                   </tr>

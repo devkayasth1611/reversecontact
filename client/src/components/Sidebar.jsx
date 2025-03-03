@@ -3,68 +3,85 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import "../css/ProfileLookup.css";
 
 const Sidebar = () => {
-  const [userEmail, setUserEmail] = useState(null); // State to store user email
-  const location = useLocation(); 
-  const navigate = useNavigate(); // Import useNavigate for navigation
-  const roleId = sessionStorage.getItem("roleId"); // Fetch roleId from sessionStorage
+  const [userEmail, setUserEmail] = useState(null);
+  const [expandedSections, setExpandedSections] = useState({});
+  const location = useLocation();
+  const navigate = useNavigate();
+  const roleId = sessionStorage.getItem("roleId");
 
-  // useEffect hook to fetch user data from sessionStorage
   useEffect(() => {
     const user = JSON.parse(sessionStorage.getItem("user"));
-    console.log("Fetched user:", user); // Debugging line
+    console.log("Fetched user:", user);
     
     if (user && user.email) {
-      setUserEmail(user.email); // Set user email if available
+      setUserEmail(user.email);
     } else {
-      setUserEmail("Guest"); // Fallback value if no email found
+      setUserEmail("Guest");
       console.log("User data not found or incomplete.");
     }
   }, []);
 
-  // Define menu items for both roles
+  // Function to toggle the expanded/collapsed state of menu sections
+  const toggleSection = (section) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
   const adminMenuItems = [
-    { name: "Add User", path: "/add-user" },
-    { name: "User List", path: "/user-list" },
-    { name: "Statistic", path: "/statistic" },
-    { name: "Credit Report", path: "/user-credit-report"},
-    { name: "Sign out" },
+    {
+      section: "Lookup",
+      items: [
+        { name: "Profile Lookup", path: "/profile-lookup" },
+        { name: "Bulk Lookup", path: "/bulk-lookup" },
+      ],
+    },
+    {
+      section: "Settings",
+      items: [
+        { name: "Add User", path: "/add-user" },
+        { name: "User Lists", path: "/user-list" },
+        { name: "Sign out" },
+      ],
+    },
+    {
+      section: "Statistics",
+      items: [
+        { name: "Lookup Statistics", path: "/UserStatistics" },
+        { name: "Credit Reports", path: "/user-credit-report" },
+        { name: "User Statistics", path: "/statistic" },
+      ],
+    },
   ];
 
   const userMenuItems = [
     { name: "Profile Lookup", path: "/profile-lookup" },
     { name: "Bulk Lookup", path: "/bulk-lookup" },
-    { name: "User Statistic", path: "/UserStatistics" },
-    { name: "Credit Report", path: "/user-credit-report"},
-    // { name: "API Documentation" },
-    // { name: "Plans & Pricing" },
+    { name: "User Statistics", path: "/UserStatistics" },
+    { name: "Credit Reports", path: "/user-credit-report" },
     { name: "Sign out" },
   ];
 
   const superAdminItems = [
-    { name: "All Admin", path: "/all-admin" },
-    { name: "All User", path: "/all-user" },
-    { name: "All User Statistic", path: "/all-user-statistics" },
-    { name: "Credit Report", path: "/admin-credit-report"},
-    // { name: "API Documentation" },
-    // { name: "Plans & Pricing" },
+    { name: "All Admins", path: "/all-admin" },
+    { name: "All Users", path: "/all-user" },
+    { name: "All User Statistics", path: "/all-user-statistics" },
+    { name: "Credit Reports", path: "/admin-credit-report" },
     { name: "Sign out" },
   ];
 
-  // Choose menu items based on roleId
-  const menuItems = roleId === "1" 
-  ? adminMenuItems 
-  : roleId === "2" 
-  ? userMenuItems 
-  : roleId === "3" 
-  ? superAdminItems 
-  : [];
-
+  const menuItems =
+    roleId === "1" ? adminMenuItems :
+    roleId === "2" ? userMenuItems :
+    roleId === "3" ? superAdminItems :
+    [];
 
   const handleMenuClick = (menuItem) => {
     if (menuItem === "Sign out") {
       sessionStorage.removeItem("user");
-      sessionStorage.removeItem("roleId"); // Clear roleId on logout
-      navigate("/login"); // Use navigate to redirect to login
+      sessionStorage.removeItem("roleId");
+      navigate("/login");
     }
   };
 
@@ -72,43 +89,79 @@ const Sidebar = () => {
     <aside className="sidebar">
       <div className="user-info">
         <div className="avatar-container">
-          <img
-            src="/profile.png"
-            alt="Profile"
-            className="avatar"
-          />
+          <img src="/profile.png" alt="Profile" className="avatar" />
         </div>
-        {/* Display the user email */}
         <p>{userEmail ? userEmail : "Loading..."}</p>
       </div>
       <nav className="menu">
         <ul>
-          {menuItems.map((item) => (
-            <li
-              key={item.name}
-              onClick={() => handleMenuClick(item.name)}
-              className={item.path === location.pathname ? "menu-item active" : "menu-item"}
-            >
-              {item.path ? (
-                <Link to={item.path} className="menu-link">
-                  {item.name}
-                </Link>
-              ) : (
-                <span className="menu-link">{item.name}</span>
-              )}
-            </li>
-          ))}
+          {roleId === "1" &&
+            adminMenuItems.map((section) => (
+              <li key={section.section}>
+                <div
+                  className="menu-section"
+                  onClick={() => toggleSection(section.section)}
+                >
+                  {section.section}{" "}
+                  <span className="arrow">
+                    {expandedSections[section.section] ? "▲" : "▼"}
+                  </span>
+                </div>
+                {expandedSections[section.section] && (
+                  <ul className="submenu">
+                    {section.items.map((item) => (
+                      <li
+                        key={item.name}
+                        onClick={() => handleMenuClick(item.name)}
+                        className={
+                          item.path === location.pathname
+                            ? "menu-item active"
+                            : "menu-item"
+                        }
+                      >
+                        {item.path ? (
+                          <Link to={item.path} className="menu-link">
+                            {item.name}
+                          </Link>
+                        ) : (
+                          <span className="menu-link">{item.name}</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+
+          {(roleId === "2" || roleId === "3") &&
+            menuItems.map((item) => (
+              <li
+                key={item.name}
+                onClick={() => handleMenuClick(item.name)}
+                className={
+                  item.path === location.pathname ? "menu-item active" : "menu-item"
+                }
+              >
+                {item.path ? (
+                  <Link to={item.path} className="menu-link">
+                    {item.name}
+                  </Link>
+                ) : (
+                  <span className="menu-link">{item.name}</span>
+                )}
+              </li>
+            ))}
         </ul>
       </nav>
       {roleId === "1" && (
-      <div className="start-plan">
-        <h3>Start Your Plan</h3>
-        <p>
-          Upgrade your plan to unlock additional features and access more credits.
-        </p>
-        <button>Upgrade</button>
-      </div>
-    )}
+        <div className="start-plan">
+          <h3>Start Your Plan</h3>
+          <p>
+            Upgrade your plan to unlock additional features and access more credits.
+          </p>
+          <button>Upgrade</button>
+        </div>
+      )}
     </aside>
   );
 };

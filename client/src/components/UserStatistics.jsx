@@ -62,7 +62,7 @@ const UserStatistics = () => {
       <div className="main-content">
         {/* Header Section */}
         <div className="header">
-          <h1 className="profile-lookup">User Statistics</h1>
+          <h1 className="profile-lookup">Statistics</h1>
         </div>
 
         <div className="statistics-page">

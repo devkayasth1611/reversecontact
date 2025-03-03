@@ -98,7 +98,7 @@ exports.updateCredits = async (req, res) => {
 // Get Users with roleId = 2
 exports.getUser = async (req, res) => {
   try {
-    const users = await userSchema.find({ roleId: 2 });
+    const users = await userSchema.find();
 
     if (!users.length) {
       return res.status(404).json({ message: "No users found with roleId = 2." });

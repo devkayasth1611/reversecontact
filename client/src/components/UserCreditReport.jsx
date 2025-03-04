@@ -3,7 +3,8 @@ import Sidebar from "../components/Sidebar";
 
 const UserCreditReport = () => {
   const [transactions, setTransactions] = useState([]);
-  const userEmail = JSON.parse(sessionStorage.getItem("user"))?.email || "Guest";
+  const userEmail =
+    JSON.parse(sessionStorage.getItem("user"))?.email || "Guest";
 
   useEffect(() => {
     fetchCreditTransactions();
@@ -11,10 +12,13 @@ const UserCreditReport = () => {
 
   const fetchCreditTransactions = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/transactions/credit-transactions/${userEmail}`);
+      const response = await fetch(
+        `http://localhost:3000/transactions/credit-transactions/${userEmail}`
+      );
       if (!response.ok) throw new Error("Failed to fetch transactions");
 
       const { data } = await response.json();
+      console.log("Fetched Transactions:", data); // Debugging
       setTransactions(data);
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -30,7 +34,7 @@ const UserCreditReport = () => {
           <thead>
             <tr>
               <th>Date</th>
-              {/* <th>Email</th> */}
+              <th>Sender Email</th> {/* New Column */}
               <th>Transaction</th>
               <th>Amount</th>
               <th>Remaining Credits</th>
@@ -44,8 +48,16 @@ const UserCreditReport = () => {
             ) : (
               transactions.map((transaction, index) => (
                 <tr key={index}>
-                  <td>{new Date(transaction.transactionDate).toLocaleString()}</td>
-                  {/* <td>{transaction.userEmail}</td> */}
+                  <td>
+                    {new Date(transaction.transactionDate).toLocaleString()}
+                  </td>
+                  <td>
+                    <td>
+                      {transaction.senderEmail === userEmail
+                        ? transaction.userEmail
+                        : transaction.senderEmail}
+                    </td>
+                  </td>
                   <td>{transaction.transactionType}</td>
                   <td>{transaction.amount}</td>
                   <td>{transaction.remainingCredits}</td>

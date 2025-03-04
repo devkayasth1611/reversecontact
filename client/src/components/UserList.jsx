@@ -97,38 +97,36 @@ const handleMinusCredits = async (email, existingCredits) => {
       return;
     }
   
-    // Determine transaction type correctly
-    const senderTransactionType = isAdding ? "debit" : "credit"; // Logged-in user is sending (reduce for add, increase for minus)
-    const recipientTransactionType = isAdding ? "credit" : "debit"; // Recipient is receiving (increase for add, reduce for minus)
+    const senderTransactionType = isAdding ? "debit" : "credit";
+    const recipientTransactionType = isAdding ? "credit" : "debit";
   
     try {
-      // Update recipient user's credits
       await fetch("http://localhost:3000/transactions/update-credits", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userEmail: email, // Recipient user
+          userEmail: email,
           updatedCredits: updatedUserCredits,
           transactionType: recipientTransactionType,
           amount: Math.abs(transferCredits),
+          senderEmail: userEmail, // Include sender email
         }),
       });
   
-      // Update logged-in user's credits
       await fetch("http://localhost:3000/transactions/update-credits", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userEmail, // Logged-in user
+          userEmail, 
           updatedCredits: updatedLoggedInCredits,
           transactionType: senderTransactionType,
           amount: Math.abs(transferCredits),
+          senderEmail: userEmail, // Include sender email
         }),
       });
   
       alert(`Transaction successful! Your new credits: ${updatedLoggedInCredits}`);
   
-      // Update UI
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.userEmail === email ? { ...user, credits: updatedUserCredits } : user
@@ -142,6 +140,7 @@ const handleMinusCredits = async (email, existingCredits) => {
       alert(error.message);
     }
   };
+  
   
   
   return (

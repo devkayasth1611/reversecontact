@@ -81,18 +81,18 @@ const BulkLookup = () => {
       alert("Please upload a file first.");
       return;
     }
-
+  
     if (statistics.remainingCredits <= 0) {
       alert("You have no remaining credits. Please contact support.");
       return;
     }
-
+  
     try {
       const reader = new FileReader();
       reader.onload = async (e) => {
         const fileData = e.target.result;
         let links = [];
-
+  
         if (file.name.endsWith(".csv")) {
           const parsedData = Papa.parse(fileData, { header: false }).data;
           links = parsedData.flat();
@@ -102,61 +102,49 @@ const BulkLookup = () => {
           const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
           links = jsonData.flat();
         }
-
+  
         const linkedinRegex = /([a-z]{2,3}\.)?linkedin\.com\/.+$/;
         const validLinks = links.filter((link) => linkedinRegex.test(link));
-
+  
         if (validLinks.length === 0) {
           alert("No valid LinkedIn links found in the file.");
           return;
         }
-
-        const linkUploadCount = validLinks.length; // Number of valid LinkedIn links
-        const creditDeduction = linkUploadCount * 5; // Deduct credits (5 per link)
-
-        if (statistics.remainingCredits < creditDeduction) {
-          alert("Insufficient credits to process this file.");
-          return;
-        }
-
+  
         setIsLoading(true);
-
+  
         try {
-          const apiUrl = `http://localhost:3000/mobileEnrichments/mobileEnrichment?linkedin_url=${validLinks.join(
-            ","
-          )}`;
+          const apiUrl = `http://localhost:3000/mobileEnrichments/mobileEnrichment?linkedin_url=${validLinks.join(",")}`;
           const response = await fetch(apiUrl);
-
+  
           if (!response.ok) throw new Error("Failed to fetch bulk data");
-
+  
           const data = await response.json();
-
+  
           if (data.data && data.data.length > 0) {
-            const bulkData = validLinks.map((link, index) => {
-              const result = data.data[index];
-              return {
-                linkedin_url: link,
-                full_name: result?.full_name || "Not Available",
-                lead_location: Array.isArray(result?.lead_location)
-                  ? result.lead_location.join(", ")
-                  : result?.lead_location || "Not Available",
-                mobile_1: result?.mobile_1 || "Not Available",
-                mobile_2: result?.mobile_2 || "Not Available",
-              };
-            });
-
+            // Filter only the links that have valid data in the database
+            const fetchedLinks = data.data.filter((item) => item !== null);
+            const bulkData = fetchedLinks.map((result, index) => ({
+              linkedin_url: validLinks[index],
+              full_name: result?.full_name || "Not Available",
+              lead_location: Array.isArray(result?.lead_location)
+                ? result.lead_location.join(", ")
+                : result?.lead_location || "Not Available",
+              mobile_1: result?.mobile_1 || "Not Available",
+              mobile_2: result?.mobile_2 || "Not Available",
+            }));
+  
             setBulkResults(bulkData);
-            await saveStatistics(file.name, validLinks, linkUploadCount);
-
+            await saveStatistics(file.name, fetchedLinks, fetchedLinks.length);
+  
             // **Auto-Save the file immediately after fetching**
             await saveFileToDatabase(bulkData);
-
-            const newCredits = Math.max(
-              0,
-              statistics.remainingCredits - creditDeduction
-            ); // Deduct credits
+  
+            // Deduct credits only for links that returned data
+            const creditDeduction = fetchedLinks.length * 5; // Deduct credits (5 per valid link)
+            const newCredits = Math.max(0, statistics.remainingCredits - creditDeduction);
             await updateUserCredits(newCredits);
-
+  
             alert("Bulk data fetched successfully and statistics saved!");
           } else {
             alert("No data found for the provided LinkedIn URLs.");
@@ -168,7 +156,7 @@ const BulkLookup = () => {
           setIsLoading(false);
         }
       };
-
+  
       if (file.name.endsWith(".csv")) {
         reader.readAsText(file);
       } else if (file.name.endsWith(".xlsx")) {
@@ -179,6 +167,7 @@ const BulkLookup = () => {
       alert("Error processing file. Please try again later.");
     }
   };
+  
 
   const saveStatistics = async (filename, validLinks, linkUploadCount) => {
     const userStats =

@@ -8,6 +8,11 @@ const creditTransactionSchema = new Schema(
       required: true,
       trim: true,
     },
+    senderEmail: { // Add sender email field
+      type: String,
+      required: true,
+      trim: true,
+    },
     transactionType: {
       type: String, // "add" or "minus"
       required: true,

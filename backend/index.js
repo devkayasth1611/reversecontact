@@ -50,3 +50,6 @@ app.use("/transactions", creditTransactionRoutes);
 
 const excelRoutes = require('./routes/excelRoutes')
 app.use('/excel', excelRoutes);
+
+const superAdminRoutes = require('./routes/superAdminRoutes')
+app.use('/super-admin', superAdminRoutes);

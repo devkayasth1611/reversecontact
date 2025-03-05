@@ -46,36 +46,55 @@ const AllAdmin = () => {
       alert("Please enter credits");
       return;
     }
-
+  
     const user = users.find((user) => user.userEmail === userEmail);
     if (!user) {
       alert("User not found");
       return;
     }
-
+  
     const updatedCredits = Number(user.credits) + Number(newCredits);
-
+    const senderEmail = JSON.parse(sessionStorage.getItem("user"))?.email || "Super Admin";
+  
     try {
-      const response = await fetch(
-        "http://localhost:3000/users/update-credits",
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userEmail, credits: updatedCredits }),
-        }
-      );
-
+      // 1️⃣ First, update user credits
+      const response = await fetch("http://localhost:3000/users/update-credits", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userEmail, credits: updatedCredits }),
+      });
+  
       const result = await response.json();
-      if (response.ok) {
+      if (!response.ok) {
         alert(result.message);
-        fetchUsersWithCredits();
-      } else {
-        alert(result.message);
+        return;
       }
+  
+      // 2️⃣ Now, create a transaction entry
+      const transactionResponse = await fetch("http://localhost:3000/super-admin/assign-credits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          senderEmail,
+          recipientEmail: userEmail,
+          amount: Number(newCredits),
+          remainingCredits: updatedCredits,
+        }),
+      });
+  
+      const transactionResult = await transactionResponse.json();
+      if (!transactionResponse.ok) {
+        alert(transactionResult.message);
+        return;
+      }
+  
+      alert("Credits assigned successfully!");
+      fetchUsersWithCredits(); // Refresh user list
     } catch (error) {
       console.error("Error updating credits:", error);
     }
   };
+  
 
   const handleInputChange = (index, value) => {
     const updatedUsers = [...users];
@@ -176,4 +195,4 @@ const AllAdmin = () => {
   );
 };
 
-export default AllAdmin;  
+export default AllAdmin;

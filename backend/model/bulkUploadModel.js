@@ -15,4 +15,4 @@ const bulkUploadSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("BulkUpload", bulkUploadSchema);
+module.exports = mongoose.model("AllStatistic", bulkUploadSchema);

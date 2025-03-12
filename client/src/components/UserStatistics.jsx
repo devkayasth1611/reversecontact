@@ -4,10 +4,12 @@ import "../css/UserStatistic.css"; // Import external styles
 
 const UserStatistics = () => {
   const [statistics, setStatistics] = useState([]);
+  const [fileHistory, setFileHistory] = useState([]); // Store file history
   const [loading, setLoading] = useState(false);
 
   // Retrieve the logged-in user's email
-  const userEmail = JSON.parse(sessionStorage.getItem("user"))?.email || "Guest";
+  const userEmail =
+    JSON.parse(sessionStorage.getItem("user"))?.email || "Guest";
 
   // Redirect to login if the user is not authenticated
   useEffect(() => {
@@ -24,14 +26,19 @@ const UserStatistics = () => {
       setLoading(true);
 
       try {
+        // Get the date 3 months ago from today
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+        const formattedDate = threeMonthsAgo.toISOString(); // Convert to ISO format for API
+
+        // Fetch statistics data for the last 3 months
         const response = await fetch(
-          `http://localhost:3000/bulkUpload/userStatistics?email=${userEmail}`
+          `http://localhost:3000/bulkUpload/userStatistics?email=${userEmail}&fromDate=${formattedDate}`
         );
 
         if (!response.ok) throw new Error("Failed to fetch statistics");
 
         const data = await response.json();
-
         setStatistics(data.length > 0 ? data : []);
       } catch (err) {
         console.error("Error fetching statistics:", err);
@@ -40,7 +47,29 @@ const UserStatistics = () => {
       }
     };
 
+    const fetchFileHistory = async () => {
+      if (!userEmail || userEmail === "Guest") return;
+
+      try {
+        // Fetch uploaded file history (last 3 months)
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+        const formattedDate = threeMonthsAgo.toISOString();
+
+        const response = await fetch(
+          `http://localhost:3000/excel/history/${userEmail}?fromDate=${formattedDate}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch file history");
+
+        const data = await response.json();
+        setFileHistory(data);
+      } catch (error) {
+        console.error("Error fetching file history:", error);
+      }
+    };
+
     fetchUserStatistics();
+    fetchFileHistory();
   }, [userEmail]);
 
   // Function to format date to dd-mm-yy
@@ -53,6 +82,18 @@ const UserStatistics = () => {
     });
   };
 
+  // Function to find the matching file for a statistic row based on date
+  const findMatchingFile = (statDate) => {
+    return fileHistory.find(
+      (file) => formatDate(file.uploadedAt) === formatDate(statDate)
+    );
+  };
+
+  // Function to handle file download
+  const handleDownloadFile = async (filePath) => {
+    window.open(`http://localhost:3000/${filePath}`, "_blank");
+  };
+
   return (
     <div className="dashboard">
       {/* Sidebar Component */}
@@ -62,7 +103,7 @@ const UserStatistics = () => {
       <div className="main-content">
         {/* Header Section */}
         <div className="header">
-          <h1 className="profile-lookup">Statistics</h1>
+          <h1 className="profile-lookup">Statistics (Last 3 Months)</h1>
         </div>
 
         <div className="statistics-page">
@@ -83,28 +124,48 @@ const UserStatistics = () => {
                     <th>New Enriched Count</th>
                     <th>Credits Used</th>
                     <th>Remaining Credits</th>
+                    <th>Download</th>
                   </tr>
                 </thead>
                 <tbody>
                   {statistics.length > 0 ? (
-                    statistics.map((stat, index) => (
-                      <tr key={index}>
-                        <td>{index + 1}</td>
-                        <td>{stat.task}</td>
-                        <td>{formatDate(stat.date)}</td>
-                        <td>{stat.filename}</td>
-                        <td>{stat.linkUpload}</td>
-                        <td>{stat.duplicateCount}</td>
-                        <td>{stat.netNewCount}</td>
-                        <td>{stat.newEnrichedCount}</td>
-                        <td>{stat.creditUsed}</td>
-                        <td>{stat.remainingCredits}</td>
-                      </tr>
-                    ))
+                    statistics.map((stat, index) => {
+                      const matchingFile = findMatchingFile(stat.date);
+                      return (
+                        <tr key={index}>
+                          <td>{index + 1}</td>
+                          <td>{stat.task}</td>
+                          <td>{formatDate(stat.date)}</td>
+                          <td>{stat.filename}</td>
+                          <td>{stat.linkUpload}</td>
+                          <td>{stat.duplicateCount}</td>
+                          <td>{stat.netNewCount}</td>
+                          <td>{stat.newEnrichedCount}</td>
+                          <td>{stat.creditUsed}</td>
+                          <td>{stat.remainingCredits}</td>
+                          <td>
+                            {stat.filename &&
+                            stat.filename.includes("linkedin.com") ? (
+                              "" // If the filename contains LinkedIn, leave the cell empty
+                            ) : matchingFile ? (
+                              <button
+                                onClick={() =>
+                                  handleDownloadFile(matchingFile.filePath)
+                                }
+                              >
+                                Download
+                              </button>
+                            ) : (
+                              "No File"
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
-                      <td colSpan="10" className="no-data">
-                        No statistics available.
+                      <td colSpan="11" className="no-data">
+                        No statistics available for the last 3 months.
                       </td>
                     </tr>
                   )}
